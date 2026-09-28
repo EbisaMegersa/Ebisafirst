@@ -20,11 +20,8 @@
   button{font-family:inherit}
   svg{display:block}
   ::selection{background:rgba(245,185,59,.3)}
-
   #app{max-width:430px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;background:var(--bg)}
   @media(min-width:500px){#app{border-left:1px solid var(--line);border-right:1px solid var(--line)}}
-
-  /* ---------- top bar ---------- */
   #topbar{display:flex;align-items:center;gap:10px;padding:14px 16px;position:sticky;top:0;z-index:50;
     background:rgba(11,11,13,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
   #ava{width:40px;height:40px;border-radius:50%;overflow:hidden;background:var(--panel2);border:1px solid var(--line);
@@ -38,13 +35,11 @@
   .icon-btn:hover{filter:brightness(1.25)}
   .icon-btn:active{transform:scale(.94)}
   .icon-btn svg{width:17px;height:17px}
-
-  /* ---------- server status chip ---------- */
   .net-chip{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 11px;border-radius:999px;
     background:var(--panel2);border:1px solid var(--line);cursor:pointer;flex-shrink:0;
-    font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--muted);transition:filter .15s}
+    font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--muted)}
   .net-chip:active{transform:scale(.95)}
-  .net-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);transition:background .3s}
+  .net-dot{width:7px;height:7px;border-radius:50%;background:var(--muted)}
   .net-chip.online{color:#6FCE87;border-color:rgba(90,200,120,.35)}
   .net-chip.online .net-dot{background:#4CC66B}
   .net-chip.offline{color:#E8837A;border-color:rgba(230,120,110,.35)}
@@ -52,17 +47,13 @@
   .net-chip.demo{color:var(--accent);border-color:rgba(245,185,59,.35)}
   .net-chip.demo .net-dot{background:var(--accent)}
   .net-chip.checking .net-dot{background:var(--accent);animation:blink 1s infinite}
-
   main{flex:1;overflow-y:auto;padding:0 16px calc(96px + env(safe-area-inset-bottom))}
   .view{display:none;animation:viewIn .25s ease}
   .view.active{display:block}
   @keyframes viewIn{from{opacity:0;transform:translateY(6px)}}
-
   h1{font-size:22px;font-weight:700;letter-spacing:-.02em;margin-top:16px}
   .sub{color:var(--muted);font-size:13px;margin:5px 0 18px;line-height:1.45}
   .sub b{color:var(--accent)}
-
-  /* ---------- ticker ---------- */
   .ticker{overflow:hidden;margin:12px -16px 0;padding:2px 0;
     -webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
     mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
@@ -71,8 +62,6 @@
   .tk b{color:var(--text);font-weight:600}
   .tk::before{content:'';display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--accent);margin-right:8px;vertical-align:2px}
   @keyframes marquee{to{transform:translateX(-50%)}}
-
-  /* ---------- balance ---------- */
   .balance{margin-top:18px}
   .bal-label{display:flex;justify-content:space-between;align-items:center;font-size:11px;letter-spacing:.14em;color:var(--muted);font-weight:600}
   .brand{color:var(--accent);letter-spacing:.3em;font-size:10px}
@@ -84,8 +73,6 @@
   .lvlbar{height:5px;background:var(--panel2);border-radius:3px;overflow:hidden}
   .lvlbar i{display:block;height:100%;background:var(--accent);border-radius:3px;width:0;transition:width .4s ease}
   .lvl-row{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px;letter-spacing:.05em}
-
-  /* ---------- tap orb ---------- */
   #orbWrap{width:min(64vw,240px);margin:26px auto 0;position:relative;aspect-ratio:1}
   #orb{position:absolute;inset:0;border-radius:50%;background:var(--accent);
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;
@@ -109,8 +96,6 @@
   #orbLock svg{width:12px;height:12px}
   #orbWrap.depleted #orb{filter:grayscale(.75) brightness(.55)}
   #orbWrap.depleted #orbLock{display:flex}
-
-  /* ---------- energy ---------- */
   .energy{width:min(64vw,240px);margin:20px auto 0}
   .energy-head{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px;letter-spacing:.04em}
   .e-lbl{display:flex;align-items:center;gap:5px}
@@ -118,12 +103,12 @@
   #energyTxt{font-variant-numeric:tabular-nums}
   .ebar{height:6px;background:var(--panel2);border-radius:3px;overflow:hidden}
   .ebar i{display:block;height:100%;background:var(--accent);width:100%;transition:width .2s linear}
-
-  /* ---------- shared ---------- */
   .panel{background:var(--panel);border:1px solid var(--line);border-radius:16px}
   .pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;border:1px solid var(--line);
     font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap}
   .pill.gold{color:var(--accent);border-color:rgba(245,185,59,.35);background:rgba(245,185,59,.08)}
+  .pill.paid{color:#6FCE87;border-color:rgba(90,200,120,.35);background:rgba(90,200,120,.08)}
+  .pill.dec{color:#E8837A;border-color:rgba(230,120,110,.35);background:rgba(230,120,110,.08)}
   .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:12px;
     font-weight:600;cursor:pointer;transition:filter .15s,transform .05s}
   .btn:hover{filter:brightness(1.07)}
@@ -139,8 +124,6 @@
   .list-head svg{width:14px;height:14px;color:var(--accent)}
   .spin{width:15px;height:15px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:rot .7s linear infinite}
   @keyframes rot{to{transform:rotate(360deg)}}
-
-  /* ---------- rows ---------- */
   .trow{display:flex;align-items:center;gap:12px;padding:13px 14px}
   .trow:not(:last-child){border-bottom:1px solid var(--line)}
   .trow.feat{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:15px;margin-bottom:6px}
@@ -157,8 +140,6 @@
   .done-chip{width:32px;height:32px;border-radius:50%;background:var(--accent);display:grid;place-items:center;color:var(--ink);flex-shrink:0}
   .done-chip svg{width:15px;height:15px}
   .foot-note{font-size:12px;color:var(--muted);margin-top:14px;line-height:1.5}
-
-  /* ---------- daily ---------- */
   .daily{padding:14px;margin-top:22px}
   .d-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
   .d-title{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:600}
@@ -174,8 +155,6 @@
   .dchip.today{border-color:var(--accent);animation:blink 1.6s infinite}
   @keyframes blink{50%{border-color:rgba(245,185,59,.3)}}
   .daily .btn-block{margin-top:12px}
-
-  /* ---------- friends ---------- */
   .linkbox{display:flex;align-items:center;gap:10px;padding:10px 10px 10px 14px;margin-bottom:10px}
   #refLink{flex:1;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .stats{display:flex;align-items:stretch;padding:16px;margin-top:14px}
@@ -203,8 +182,6 @@
   .bpts{margin-left:auto;font-size:12.5px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums;flex-shrink:0}
   .brow.me .bpts{color:var(--accent)}
   .bgap{text-align:center;color:var(--muted);padding:2px 0;font-size:14px;letter-spacing:.2em}
-
-  /* ---------- tab bar ---------- */
   #tabbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;display:flex;
     background:rgba(13,13,15,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
     border-top:1px solid var(--line);padding:7px 8px calc(7px + env(safe-area-inset-bottom));z-index:100}
@@ -214,8 +191,6 @@
   .nav-btn svg{width:21px;height:21px}
   .nav-btn.active{color:var(--accent)}
   .nav-btn.active::before{content:'';position:absolute;top:-8px;width:26px;height:2px;border-radius:2px;background:var(--accent)}
-
-  /* ---------- toast / sheets / fx ---------- */
   #toast{position:fixed;top:16px;left:50%;transform:translate(-50%,-80px);z-index:300;display:flex;gap:8px;align-items:center;
     background:#1C1C21;border:1px solid var(--line);padding:10px 16px;border-radius:999px;font-size:13px;font-weight:500;
     transition:transform .3s cubic-bezier(.2,.9,.3,1.2);box-shadow:0 8px 24px rgba(0,0,0,.5);white-space:nowrap;max-width:92vw;overflow:hidden}
@@ -238,6 +213,14 @@
   .fx{position:fixed;z-index:300;transform:translate(-50%,-50%);font-weight:700;font-size:15px;color:var(--accent);
     pointer-events:none;animation:fxUp .8s cubic-bezier(.2,.7,.3,1) forwards;text-shadow:0 2px 10px rgba(0,0,0,.55);font-variant-numeric:tabular-nums}
   @keyframes fxUp{to{opacity:0;transform:translate(calc(-50% + var(--dx,0px)),calc(-50% - 84px))}}
+  .wd-form{display:flex;flex-direction:column;gap:8px;margin:4px 0 6px}
+  .wd-form label{font-size:10.5px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;font-weight:600}
+  .wd-form input{background:var(--panel2);border:1px solid var(--line);border-radius:10px;height:44px;
+    padding:0 12px;color:var(--text);font-family:inherit;font-size:15px;width:100%}
+  .wd-form input:focus{outline:none;border-color:var(--accent)}
+  .wdrow{display:flex;align-items:center;gap:10px;padding:11px 12px}
+  .wdrow:not(:last-child){border-bottom:1px solid var(--line)}
+  #wdList{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
 </style>
 </head>
 <body>
@@ -293,6 +276,14 @@
         </div>
         <div class="d-chips" id="dailyChips"></div>
         <button class="btn btn-accent btn-block" id="dailyBtn"></button>
+      </div>
+
+      <div class="panel daily">
+        <div class="d-head">
+          <span class="d-title"><i data-lucide="banknote"></i>Withdraw</span>
+          <span class="pill" id="wdPill">min 5,000</span>
+        </div>
+        <button class="btn btn-accent btn-block" id="wdOpen"><i data-lucide="banknote"></i>Withdraw points</button>
       </div>
     </section>
 
@@ -361,14 +352,14 @@
       <h3>How POINTR works</h3>
       <button id="sheetClose" class="icon-btn" aria-label="Close"><i data-lucide="x"></i></button>
     </div>
-    <div class="sh-row"><i data-lucide="coins"></i><div><b>Tap to earn</b><span>Each tap costs 1 energy. Energy recharges over time, so pace yourself or boost your tank.</span></div></div>
+    <div class="sh-row"><i data-lucide="coins"></i><div><b>Tap to earn</b><span>Each tap costs 1 energy. Energy recharges over time.</span></div></div>
     <div class="sh-row"><i data-lucide="gift"></i><div><b>Daily bonus</b><span>Come back every day — the reward grows with your streak up to day 7.</span></div></div>
-    <div class="sh-row"><i data-lucide="users"></i><div><b>Invite friends</b><span>+5 points for every friend who opens the app through your personal link — counted live on the server.</span></div></div>
+    <div class="sh-row"><i data-lucide="users"></i><div><b>Invite friends</b><span>+5 points for every friend who joins through your link.</span></div></div>
+    <div class="sh-row"><i data-lucide="banknote"></i><div><b>Withdraw</b><span>Request a payout of your points. The team reviews it — approved payouts are sent to the details you provide, declined requests refund your points automatically.</span></div></div>
     <div class="sh-row"><i data-lucide="rocket"></i><div><b>Boost</b><span>Spend points on multi-tap and energy upgrades to earn faster permanently.</span></div></div>
-    <p class="sh-note">Your progress is stored per Telegram account. Referral counts are verified and stored on the server, so nobody can fake them.</p>
   </div>
 
-  <!-- Server status sheet (tap the chip in the top bar) -->
+  <!-- Server status sheet -->
   <div id="netsheet" class="sheet">
     <div class="handle"></div>
     <div class="sh-head">
@@ -384,27 +375,42 @@
     <button class="btn btn-accent btn-block" id="nsCheck"><i data-lucide="refresh-cw"></i>Check again</button>
     <p class="sh-note" id="nsHint"></p>
   </div>
+
+  <!-- Withdraw sheet -->
+  <div id="wdsheet" class="sheet">
+    <div class="handle"></div>
+    <div class="sh-head">
+      <h3>Withdraw points</h3>
+      <button id="wdClose" class="icon-btn" aria-label="Close"><i data-lucide="x"></i></button>
+    </div>
+    <div class="sh-row"><i data-lucide="wallet"></i><div><b>Server balance</b><span id="wdBal">syncing…</span></div></div>
+    <div class="wd-form">
+      <label>Amount (min 5,000 pts)</label>
+      <input id="wdAmount" type="number" inputmode="numeric" placeholder="5000">
+      <label>Payment details (phone / account)</label>
+      <input id="wdNote" type="text" maxlength="120" placeholder="e.g. Telebirr 09xxxxxxxx">
+      <button class="btn btn-accent btn-block" id="wdSubmit">Request withdrawal</button>
+    </div>
+    <div class="list-head">Your requests</div>
+    <div id="wdList"></div>
+    <p class="sh-note">Requests are reviewed manually. If approved, the payout is sent to the details you provided. If declined, your points are refunded automatically.</p>
+  </div>
 </div>
 
 <script src="https://unpkg.com/lucide@latest"></script>
 <script>
 /* ============================================================
-   POINTR — Telegram Mini App (full integrated build)
-   - Live referral system (Cloudflare Worker backend)
-   - Per-account save slots (each Telegram account = own data)
-   - Server status chip in the top bar + diagnostics panel
+   POINTR — Telegram Mini App (full build + withdrawals)
    ============================================================ */
 
 // ---- CONFIG ------------------------------------------------
 const BOT_USERNAME = 'EbisaNewMiniappBot';
-// >>> Paste your Cloudflare Worker URL here, e.g.
-// const API_URL = 'https://pointr-api.your-subdomain.workers.dev';
-// Leave '' to run in demo mode (app works, chip shows DEMO).
 const API_URL = 'https://pointr-api.ebisamagarsaa.workers.dev';
 const POINTS_PER_FRIEND = 5;
+const MIN_WITHDRAW = 5000;
 const CHANNEL_URL = 'https://t.me/telegram'; // TODO: your real channel
 
-// ---- Telegram bootstrap (guarded: also runs in a plain browser) ----
+// ---- Telegram bootstrap ----
 const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
 try {
   tg.ready(); tg.expand();
@@ -444,7 +450,8 @@ function defState(){
   return { v:1, updatedAt:0, balance:0, total:0, taps:0,
     energy:500, lastEnergy:Date.now(), multitap:1, tank:1,
     turboUntil:0, turboLast:0, refillLast:0,
-    dailyLast:0, streak:0, invited:0, friends:[], tasks:{}, flags:{} };
+    dailyLast:0, streak:0, invited:0, friends:[], tasks:{}, flags:{},
+    sb:null, wds:[] };
 }
 let state = defState();
 let saveT = null;
@@ -458,9 +465,6 @@ function flushSave(){ if(saveT){ clearTimeout(saveT); saveT=null; } save(); }
 function load(){
   let raw = null;
   try{ raw = localStorage.getItem(userKey()); }catch(e){}
-
-  // One-time migration from the old shared save slot.
-  // (Delete this whole if-block if you want ALL accounts to start from zero.)
   if(!raw){
     try{
       raw = localStorage.getItem(KEY);
@@ -470,11 +474,9 @@ function load(){
       }
     }catch(e){}
   }
-
   if(raw){
     try{ state = Object.assign(defState(), JSON.parse(raw)); }catch(e){ state = defState(); }
   }
-  // Prefer a newer per-account cloud save (e.g. played on another phone)
   try{
     tg && tg.CloudStorage && tg.CloudStorage.getItem(KEY, (err, val)=>{
       if(err || !val) return;
@@ -509,7 +511,6 @@ function fmtAgo(ts){
   return Math.floor(s/86400)+'d ago';
 }
 
-// ---- Toast / floating points ----
 let toastT;
 function toast(msg, icon){
   const t = $('toast');
@@ -529,7 +530,7 @@ function floatText(text, x, y){
   setTimeout(()=>el.remove(), 850);
 }
 
-// ---- Derived values ----
+// ---- Derived ----
 const energyMax   = () => 500 + (state.tank-1)*250;
 const turboActive = () => Date.now() < state.turboUntil;
 const perTap      = () => state.multitap * (turboActive() ? 3 : 1);
@@ -546,7 +547,7 @@ function lvl(){
     need: next ? next[0]-state.total : 0, nextName: next ? next[1] : null };
 }
 
-// ---- Daily bonus ----
+// ---- Daily ----
 const lastWasYesterday  = () => !!state.dailyLast &&
   new Date(state.dailyLast).toDateString() === new Date(Date.now()-864e5).toDateString();
 const dailyAvailable    = () => !state.dailyLast ||
@@ -568,11 +569,11 @@ function regenStep(){
 }
 
 // ============================================================
-//  SERVER STATUS — chip in the top bar + diagnostics sheet
+//  SERVER STATUS
 // ============================================================
-let netState = API_URL ? 'checking' : 'demo';  // demo | checking | online | offline
-let lastSyncOk = 0;                            // timestamp of last successful sync
-let lastNetMsg = '';                           // raw message/error from the server
+let netState = API_URL ? 'checking' : 'demo';
+let lastSyncOk = 0;
+let lastNetMsg = '';
 
 function setNet(s, msg){
   netState = s;
@@ -585,56 +586,46 @@ function setNet(s, msg){
     s==='demo'     ? 'DEMO'    : '…';
 }
 
-// Lightweight reachability check — hits the public /api/top endpoint (no auth needed)
 async function pingServer(){
   if(!API_URL){ setNet('demo','No API URL configured'); return false; }
   setNet('checking');
   try{
     const r = await fetch(API_URL + '/api/top', { method:'GET' });
     const d = await r.json();
-    if(d && d.ok){ setNet('online', 'OK — server and database are working'); return true; }
+    if(d && d.ok){ setNet('online','OK — server and database are working'); return true; }
     setNet('offline', (d && d.error) ? d.error : 'Unexpected response');
     return false;
   }catch(e){
-    setNet('offline', 'Could not reach the server (network error or wrong URL)');
+    setNet('offline','Could not reach the server');
     return false;
   }
 }
 
 function netHint(){
   const m = (lastNetMsg || '').toLowerCase();
-  if(netState === 'demo')
-    return 'No server configured. Deploy the Cloudflare Worker, then paste its URL into API_URL at the top of this file.';
-  if(netState === 'checking')
-    return 'Checking the connection…';
+  if(netState === 'demo') return 'No server configured.';
+  if(netState === 'checking') return 'Checking the connection…';
   if(netState === 'offline'){
-    if(m.includes('bot_token'))
-      return 'The Worker is reachable, but the bot token is missing. Cloudflare → Worker → Settings → Variables and Secrets → add BOT_TOKEN (Secret), then Deploy.';
-    if(m.includes('kv'))
-      return 'The Worker is reachable, but the database is not linked. Cloudflare → Worker → Settings → Bindings → add KV Namespace with variable name exactly KV, then Deploy.';
-    return 'Cannot reach the server. Check that API_URL matches your Worker URL exactly (https://…, no slash at the end) and that the Worker is deployed.';
+    if(m.includes('bot_token')) return 'Add BOT_TOKEN in Worker settings.';
+    if(m.includes('kv')) return 'Bind the KV namespace (name: KV) in Worker settings.';
+    return 'Cannot reach the server. Check API_URL.';
   }
   if(netState === 'online')
-    return (tg && tg.initData)
-      ? 'Connected and verified. Referral counting is live.'
-      : 'Server is fine, but you opened the app in a normal browser. Open it inside Telegram for referrals to count.';
+    return (tg && tg.initData) ? 'Connected and verified.' : 'Server fine, but open the app inside Telegram.';
   return '';
 }
 function fillNetSheet(){
-  $('nsUrl').textContent   = API_URL || 'Not set — demo mode';
-  $('nsReach').textContent =
-    netState==='online'  ? 'Yes' :
-    netState==='offline' ? 'No'  :
-    netState==='demo'    ? '—'   : 'Checking…';
+  $('nsUrl').textContent   = API_URL || 'Not set';
+  $('nsReach').textContent = netState==='online'?'Yes':netState==='offline'?'No':netState==='demo'?'—':'Checking…';
   $('nsMsg').textContent   = lastNetMsg || '—';
-  $('nsLogin').textContent = (tg && tg.initData) ? 'Yes (Telegram)' : 'No — open the app inside Telegram';
-  $('nsId').textContent    = userId() ? String(userId()) : '— (not in Telegram)';
+  $('nsLogin').textContent = (tg && tg.initData) ? 'Yes (Telegram)' : 'No';
+  $('nsId').textContent    = userId() ? String(userId()) : '—';
   $('nsSync').textContent  = lastSyncOk ? fmtAgo(lastSyncOk) : 'Never';
   $('nsHint').textContent  = netHint();
 }
 
 // ============================================================
-//  REFERRALS — live sync with the Worker
+//  REFERRALS + BALANCE SYNC
 // ============================================================
 let lastSync = 0;
 async function syncReferrals(force){
@@ -642,13 +633,15 @@ async function syncReferrals(force){
   if(!force && Date.now() - lastSync < 30000) return;
   lastSync = Date.now();
   const initData = tg ? tg.initData : '';
-  if(!initData) return; // plain browser — chip already reports what's needed
+  if(!initData) return;
   try{
     const startParam = (tg.initDataUnsafe && tg.initDataUnsafe.start_param) || '';
     const r = await fetch(API_URL + '/api/sync', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ initData, startParam })
+      body: JSON.stringify({ initData, startParam,
+        seed: (state.sb == null) ? state.balance : null,
+        delta: (state.sb == null) ? null : (state.balance - state.sb) })
     });
     const d = await r.json();
     if(!d.ok) throw new Error(d.error || 'sync failed');
@@ -659,9 +652,20 @@ async function syncReferrals(force){
 
     state.invited = d.invited;
     state.friends = d.friends || [];
-    renderFriends(); checkAuto();
+    if(Array.isArray(d.wds)) state.wds = d.wds;
 
-    // claim +5 for friends who joined since the last payout
+    // server balance is authoritative
+    if(typeof d.bal === 'number' && d.bal >= 0){
+      state.sb = d.bal;
+      if(state.balance !== d.bal){
+        state.balance = d.bal;
+        renderBalance();
+      }
+      const wp = $('wdPill');
+      if(wp) wp.textContent = 'Bal ' + fmt(d.bal);
+    }
+    renderFriends(); checkAuto(); renderWdSoft();
+
     if(d.invited > d.paid){
       const rr = await fetch(API_URL + '/api/reward', {
         method: 'POST',
@@ -715,7 +719,6 @@ function renderFriends(){
   $('refLink').textContent = refLink();
   $('frCount').textContent = state.invited;
   $('frEarned').textContent = fmt(state.invited * POINTS_PER_FRIEND);
-
   const list = $('friendList');
   if(API_URL && state.friends && state.friends.length){
     list.innerHTML = state.friends.slice().reverse().map(f =>
@@ -725,16 +728,54 @@ function renderFriends(){
       '<span class="pill gold">+'+POINTS_PER_FRIEND+' PTS</span></div>'
     ).join('');
   } else if(API_URL){
-    list.innerHTML = '<div class="brow empty"><span class="fwhen">No friends yet — share your link above.<br>When someone joins, they appear here instantly.</span></div>';
+    list.innerHTML = '<div class="brow empty"><span class="fwhen">No friends yet — share your link above.</span></div>';
   } else {
     list.innerHTML = DEMO_FRIENDS.map(f =>
       '<div class="brow"><span class="ava">'+f.n[0]+'</span>'+
       '<div class="finfo"><div class="bname">'+f.n+'</div><div class="fwhen">joined '+f.w+'</div></div>'+
       '<span class="pill">+5 PTS</span></div>'
-    ).join('') +
-    '<div class="brow empty"><span class="fwhen">Sample data — set API_URL to go live.</span></div>';
+    ).join('');
   }
   icons();
+}
+
+// ============================================================
+//  WITHDRAW
+// ============================================================
+function renderWdList(){
+  const el = $('wdList');
+  const wds = state.wds || [];
+  if(!wds.length){
+    el.innerHTML = '<div class="wdrow"><span class="fwhen">No requests yet.</span></div>';
+    return;
+  }
+  el.innerHTML = wds.map(w=>{
+    const cls = w.status==='paid' ? 'paid' : w.status==='declined' ? 'dec' : 'gold';
+    const lbl = w.status==='paid' ? 'PAID' : w.status==='declined' ? 'DECLINED' : 'PENDING';
+    return '<div class="wdrow"><div class="finfo">'+
+      '<div class="bname">−'+fmt(w.amount)+' PTS</div>'+
+      '<div class="fwhen">'+new Date(w.at).toLocaleString()+'</div></div>'+
+      '<span class="pill '+cls+'">'+lbl+'</span></div>';
+  }).join('');
+}
+function renderWd(){
+  $('wdBal').textContent = state.sb==null ? 'syncing…' : fmt(state.sb)+' PTS';
+  const btn = $('wdSubmit');
+  const ok = state.sb!=null && state.sb>=MIN_WITHDRAW;
+  btn.disabled = !ok;
+  btn.textContent = (state.sb!=null && state.sb<MIN_WITHDRAW)
+    ? 'Need min '+fmt(MIN_WITHDRAW)+' pts'
+    : 'Request withdrawal';
+  renderWdList();
+}
+function renderWdSoft(){
+  const wp = $('wdPill');
+  if(wp && state.sb!=null) wp.textContent = 'Bal '+fmt(state.sb);
+}
+function openWd(){
+  showSheet($('wdsheet'));
+  renderWd();
+  if(API_URL) syncReferrals(true).then(renderWd).catch(()=>{});
 }
 
 // ============================================================
@@ -774,13 +815,12 @@ function perTapUI(){ $('perTap').textContent = '+'+perTap()+' / tap'; }
 
 const TICKS = [
   ['Mina','claimed a 300-pt daily bonus'], ['Arjun','invited 3 friends'], ['Sofia','hit the GOLD level'],
-  ['Dmitri','activated Turbo ×3'], ['Lena','earned 500 pts from taps'], ['Omar','upgraded Multi-tap'],
+  ['Dmitri','activated Turbo ×3'], ['Lena','withdrew 10,000 pts'], ['Omar','upgraded Multi-tap'],
 ];
 function renderTicker(){
   const half = TICKS.map(t=>'<span class="tk"><b>'+t[0]+'</b> '+t[1]+'</span>').join('');
   $('tickerTrack').innerHTML = half + half;
 }
-
 function orbPulse(){
   if($('orbWrap').querySelectorAll('.ring').length > 12) return;
   const s = document.createElement('span');
@@ -836,7 +876,7 @@ function awardTask(t, rect){
   addPoints(t.reward, rect ? rect.left+rect.width/2 : null, rect ? rect.top : null);
   toast(t.title+' · +'+fmt(t.reward)+' PTS', 'check');
   haptic('notify','success');
-  renderTasks(); save();
+  renderTasks(); save(); syncReferrals(true);
 }
 function checkAuto(){
   TASKS.forEach(t => {
@@ -879,7 +919,7 @@ function claimDaily(){
   addPoints(reward, r.left+r.width/2, r.top);
   toast('Daily bonus · +'+fmt(reward)+' PTS', 'gift');
   haptic('notify','success');
-  renderDaily(); refreshMain(); save();
+  renderDaily(); refreshMain(); save(); syncReferrals(true);
 }
 
 // ---- Boosts ----
@@ -935,7 +975,7 @@ function upgradeBoost(kind){
   if(kind === 'tank') state.energy = Math.min(state.energy, energyMax());
   renderBalance(); energyUI(); perTapUI(); updateBoostUI();
   toast(kind==='multitap' ? 'Multi-tap → Lv '+state.multitap : 'Energy limit → '+fmt(energyMax()), 'rocket');
-  haptic('notify','success'); save();
+  haptic('notify','success'); save(); syncReferrals(true);
 }
 function activateTurbo(){
   if(turboActive()) return;
@@ -1009,7 +1049,7 @@ function closeSheets(){
 function openNetSheet(){
   showSheet($('netsheet'));
   fillNetSheet();
-  pingServer().then(fillNetSheet); // fresh check every time it opens
+  pingServer().then(fillNetSheet);
 }
 
 // ============================================================
@@ -1041,7 +1081,7 @@ function openNetSheet(){
     } else if(st === 'going'){
       b.disabled = true;
       b.innerHTML = '<span class="spin"></span>';
-      setTimeout(()=>awardTask(t, b.getBoundingClientRect()), 1100); // [BACKEND] real verification later
+      setTimeout(()=>awardTask(t, b.getBoundingClientRect()), 1100);
     }
   } else if(t.get() >= t.target){
     awardTask(t, b.getBoundingClientRect());
@@ -1057,6 +1097,42 @@ function openNetSheet(){
 document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click', ()=>go(b.dataset.tab)));
 
  $('dailyBtn').addEventListener('click', claimDaily);
+ $('wdOpen').addEventListener('click', openWd);
+
+ $('wdSubmit').addEventListener('click', async ()=>{
+  if(!tg || !tg.initData){ toast('Open the app inside Telegram','telegram'); return; }
+  if(state.sb == null){ toast('Balance still syncing — try again in a second','clock'); return; }
+  const amt = Math.floor(Number($('wdAmount').value) || 0);
+  if(amt < MIN_WITHDRAW){ toast('Minimum is '+fmt(MIN_WITHDRAW)+' pts','alert-circle'); return; }
+  if(amt > state.sb){ toast('More than your server balance','alert-circle'); return; }
+  const note = $('wdNote').value.trim();
+  const btn = $('wdSubmit');
+  btn.disabled = true;
+  try{
+    const r = await fetch(API_URL + '/api/withdraw', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ initData: tg.initData, amount: amt, note: note })
+    });
+    const d = await r.json();
+    if(!d.ok) throw new Error(d.error || 'failed');
+    state.balance = d.bal;
+    state.sb = d.bal;
+    state.wds = state.wds || [];
+    state.wds.unshift(d.wd);
+    renderBalance(); renderWd();
+    $('wdAmount').value = ''; $('wdNote').value = '';
+    const wp = $('wdPill'); if(wp) wp.textContent = 'Bal '+fmt(d.bal);
+    toast('Request sent — awaiting review','banknote');
+    haptic('notify','success');
+    save();
+  }catch(e){
+    const m = (e && e.message) || '';
+    toast(m === 'not enough' ? 'Not enough server balance' : 'Withdraw failed: ' + m, 'alert-circle');
+  }
+  btn.disabled = false;
+});
+
  $('copyBtn').addEventListener('click', async ()=>{
   const link = refLink();
   try{ await navigator.clipboard.writeText(link); }
@@ -1075,7 +1151,6 @@ document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click', ()=
   catch(_){ window.open(u,'_blank'); }
 });
 
-// status chip + sheets
  $('netChip').addEventListener('click', openNetSheet);
  $('nsCheck').addEventListener('click', ()=>{
   const btn = $('nsCheck');
@@ -1086,6 +1161,7 @@ document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click', ()=
  $('infoBtn').addEventListener('click', ()=>showSheet($('aboutsheet')));
  $('sheetClose').addEventListener('click', closeSheets);
  $('netClose').addEventListener('click', closeSheets);
+ $('wdClose').addEventListener('click', closeSheets);
  $('veil').addEventListener('click', closeSheets);
 
 document.addEventListener('visibilitychange', ()=>{
@@ -1116,7 +1192,7 @@ function tick(){
 // ============================================================
 function renderAll(){
   renderTop(); renderBalance(); perTapUI(); energyUI();
-  renderDaily(); renderTasks(); renderFriends();
+  renderDaily(); renderTasks(); renderFriends(); renderWdSoft();
 }
 load();
 prevAvail = dailyAvailable();
@@ -1124,15 +1200,16 @@ regenStep();
 renderTicker();
 renderBoost();
 renderAll();
+renderWdList();
 go('home');
 icons();
-pingServer();        // sets the chip: ONLINE / OFFLINE / DEMO
+pingServer();
 syncReferrals(true);
 setInterval(tick, 1000);
 setInterval(()=>{
   if(document.hidden) return;
   syncReferrals();
-  if(netState==='offline') pingServer(); // auto-retry while offline
+  if(netState==='offline') pingServer();
 }, 30000);
 </script>
 </body>
