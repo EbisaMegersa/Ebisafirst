@@ -1,959 +1,402 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#0b0b12">
-<title>CoinRush — Earn Points</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>CoinTap - Backend Connected</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.0/index.css" />
 <style>
-:root{
-  --bg:#0b0b12; --card:#16161f; --card2:#1d1d29;
-  --border:rgba(255,255,255,.08);
-  --text:#f4f4f8; --muted:#9a9ab0;
-  --gold1:#ffd76a; --gold2:#ffb02e; --gold3:#ff8a00;
-  --green:#3ddc84; --red:#ff5c7a; --violet:#8b7cf7;
-}
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%}
-body{
-  font-family:'Poppins',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
-  color:var(--text); overflow:hidden;
-  background:
-    radial-gradient(1200px 600px at 50% -10%, rgba(255,176,46,.13), transparent 60%),
-    radial-gradient(800px 500px at 110% 110%, rgba(139,124,247,.10), transparent 60%),
-    var(--bg);
-}
-#app{max-width:480px;margin:0 auto;height:100dvh;display:flex;flex-direction:column;position:relative}
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 6px}
-.user{display:flex;align-items:center;gap:10px}
-.avatar{width:44px;height:44px;border-radius:50%;overflow:hidden;flex-shrink:0;
-  background:linear-gradient(135deg,var(--gold1),var(--gold3));display:grid;place-items:center;
-  border:2px solid rgba(255,215,106,.5);font-weight:800;color:#231a05;font-size:17px}
-.avatar img{width:100%;height:100%;object-fit:cover;display:none}
-.u-name{font-weight:700;font-size:14px;line-height:1.2}
-.u-lvl{font-size:11px;color:var(--gold1);font-weight:600;display:flex;align-items:center;gap:5px}
-.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px rgba(61,220,132,.8)}
-.dot.demo{background:var(--gold2);box-shadow:0 0 6px rgba(255,176,46,.8)}
-.dot.off{background:var(--red);box-shadow:0 0 6px rgba(255,92,122,.8)}
-#conn-text{color:var(--muted)}
-.icon-btn{width:40px;height:40px;border-radius:12px;background:var(--card2);border:1px solid var(--border);
-  color:var(--text);display:grid;place-items:center;cursor:pointer;flex-shrink:0;transition:.15s}
-.icon-btn:active{transform:scale(.9)}
-.icon-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-main{flex:1;min-height:0;display:flex;flex-direction:column}
-.screen{display:none;flex:1;overflow-y:auto;padding:8px 16px calc(96px + env(safe-area-inset-bottom))}
-.screen.active{display:block;animation:fadeUp .25s ease}
-@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-.card{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--border);border-radius:20px;padding:16px}
-.sec-title{font-size:17px;font-weight:700;margin:6px 2px 12px;display:flex;align-items:center;gap:8px}
-.sec-hint{font-size:11px;color:var(--muted);font-weight:500}
-.list{display:flex;flex-direction:column;gap:10px}
-.hint{font-size:11.5px;color:var(--muted);text-align:center;margin:14px 0 0;line-height:1.5}
-.empty{text-align:center;color:var(--muted);font-size:13px;padding:18px}
-.balance-card{text-align:center;padding:18px 16px 16px;
-  background:linear-gradient(180deg,rgba(255,176,46,.10),rgba(255,176,46,.02)),var(--card);
-  border:1px solid rgba(255,176,46,.18)}
-.bal-label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
-.bal-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px}
-.bal-row .num{font-size:38px;font-weight:800;line-height:1.15;text-shadow:0 2px 18px rgba(255,176,46,.35)}
-.bal-star{filter:drop-shadow(0 0 8px rgba(255,176,46,.6))}
-.lvl-row{display:flex;align-items:center;gap:10px;margin-top:12px}
-.lvl-chip{font-size:11px;font-weight:800;padding:4px 10px;border-radius:99px;color:#231a05;
-  background:linear-gradient(135deg,var(--gold1),var(--gold3));white-space:nowrap}
-.lvl-bar{flex:1;height:8px;border-radius:99px;background:#242433;overflow:hidden}
-#lvl-fill{display:block;height:100%;width:0%;border-radius:99px;background:linear-gradient(90deg,var(--gold1),var(--gold3));transition:width .4s ease}
-.lvl-text{font-size:11px;color:var(--muted);min-width:70px;text-align:right;white-space:nowrap}
-.daily-card{display:flex;align-items:center;gap:12px;margin-top:14px}
-.daily-left{display:flex;align-items:center;gap:12px;flex:1}
-.flame{font-size:32px;filter:drop-shadow(0 4px 10px rgba(255,120,0,.45))}
-.d-title{font-weight:700;font-size:14px}
-.d-sub{font-size:11.5px;color:var(--muted);margin-top:1px}
-.btn{border:0;border-radius:14px;padding:12px 18px;font-family:inherit;font-weight:700;font-size:14px;
-  color:#231a05;background:linear-gradient(135deg,var(--gold1),var(--gold3));
-  box-shadow:0 8px 20px rgba(255,150,0,.25);cursor:pointer;transition:.15s}
-.btn:active{transform:scale(.95)}
-.btn:disabled{opacity:.45;box-shadow:none;cursor:default;transform:none}
-.btn.small{padding:10px 14px;font-size:12.5px;border-radius:12px;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
-.btn.done{background:linear-gradient(135deg,#3ddc84,#1fa864);color:#03130a;box-shadow:0 8px 20px rgba(60,220,130,.2)}
-.btn.ghost{background:var(--card2);color:var(--text);border:1px solid var(--border);box-shadow:none}
-.btn.full{width:100%;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px}
-.coin-area{position:relative;display:flex;justify-content:center;padding:28px 0 20px}
-.coin-glow{position:absolute;top:50%;left:50%;width:310px;height:310px;transform:translate(-50%,-50%);
-  background:radial-gradient(circle,rgba(255,176,46,.28),transparent 65%);border-radius:50%;
-  animation:pulse 3s ease-in-out infinite;pointer-events:none}
-@keyframes pulse{0%,100%{opacity:.7;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}}
-.coin-wrap{position:relative}
-.coin-float{animation:bob 4s ease-in-out infinite}
-@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-.coin{width:min(64vw,250px);height:min(64vw,250px);border-radius:50%;cursor:pointer;touch-action:none;
-  user-select:none;-webkit-user-select:none;transition:transform .08s ease;position:relative;
-  display:grid;place-items:center;
-  background:radial-gradient(circle at 35% 30%,#ffe9a3,var(--gold1) 35%,var(--gold2) 70%,var(--gold3));
-  box-shadow:0 22px 60px rgba(255,150,0,.38), inset 0 -12px 26px rgba(0,0,0,.28), inset 0 12px 26px rgba(255,255,255,.5)}
-.coin.pressed{transform:scale(.93)}
-.coin.shake{animation:shake .4s}
-@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
-.coin::before{content:'';position:absolute;inset:11%;border-radius:50%;border:3px dashed rgba(255,255,255,.35)}
-.coin-star{width:46%;filter:drop-shadow(0 6px 12px rgba(0,0,0,.25))}
-.float-pts{position:absolute;font-weight:800;font-size:22px;color:#fff;pointer-events:none;z-index:5;
-  text-shadow:0 2px 10px rgba(255,150,0,.9),0 0 3px rgba(0,0,0,.4);animation:floatUp .9s ease-out forwards}
-@keyframes floatUp{from{opacity:1;transform:translate(-50%,0) scale(1)}to{opacity:0;transform:translate(-50%,-95px) scale(1.3)}}
-.energy-card{padding:14px 16px}
-.energy-top{display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:8px}
-#energy-text{color:var(--muted);font-weight:600}
-.energy-bar{height:12px;border-radius:99px;background:#242433;overflow:hidden}
-#energy-fill{display:block;height:100%;width:100%;border-radius:99px;background:linear-gradient(90deg,var(--gold1),var(--gold3));transition:width .3s linear}
-.stats-row{display:flex;gap:10px;margin-top:14px}
-.stat{flex:1;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:11px 6px;text-align:center}
-.s-v{font-weight:800;font-size:16px}
-.s-l{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.09em;margin-top:2px}
-.task,.boost,.friend,.row{display:flex;align-items:center;gap:12px}
-.task.done{opacity:.5}
-.t-icon{width:44px;height:44px;border-radius:14px;background:#22222f;display:grid;place-items:center;font-size:22px;flex-shrink:0}
-.t-body{flex:1;min-width:0}
-.t-title{font-weight:600;font-size:13.5px;line-height:1.3}
-.t-reward{display:inline-flex;align-items:center;gap:4px;color:var(--gold1);font-weight:700;font-size:12px;margin-top:3px}
-.t-sub{font-size:11.5px;color:var(--muted);margin-top:2px}
-.t-count{font-weight:700;font-size:13px;color:var(--muted);white-space:nowrap}
-.t-count.plus{color:var(--green)}
-.lvl-pill{font-size:10px;font-weight:800;color:var(--gold1);background:rgba(255,176,46,.12);border:1px solid rgba(255,176,46,.25);padding:2px 8px;border-radius:99px;vertical-align:middle}
-.mini-bar{height:5px;border-radius:99px;background:#242433;margin-top:7px;overflow:hidden;max-width:170px}
-.mini-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--violet),#5ad1ff);border-radius:99px;transition:width .3s}
-.ref-hero{text-align:center;padding:22px 16px;margin-bottom:12px;
-  background:linear-gradient(160deg,rgba(139,124,247,.18),rgba(139,124,247,.03)),var(--card);
-  border-color:rgba(139,124,247,.25)}
-.rh-emoji{font-size:40px}
-.rh-title{font-weight:700;font-size:16px;margin-top:6px}
-.rh-sub{font-size:13px;color:var(--muted);margin-top:4px}
-.rh-sub b{color:var(--gold1)}
-.link-row{display:flex;gap:8px;margin-top:10px}
-#ref-link{flex:1;min-width:0;background:#101019;border:1px solid var(--border);border-radius:12px;padding:11px 12px;
-  color:var(--muted);font-size:11.5px;font-family:ui-monospace,SFMono-Regular,monospace;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;outline:none}
-.f-av{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;color:#fff;flex-shrink:0}
-.rank-wrap{width:28px;text-align:center;font-weight:800;color:var(--muted);font-size:13px;flex-shrink:0}
-.row.me{border-color:rgba(255,176,46,.45);background:linear-gradient(90deg,rgba(255,176,46,.10),transparent),var(--card)}
-.tabbar{display:flex;background:rgba(13,13,22,.82);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
-  border-top:1px solid var(--border);padding:8px 8px calc(10px + env(safe-area-inset-bottom))}
-.tab{flex:1;background:none;border:0;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px;
-  font-family:inherit;font-size:10px;font-weight:600;cursor:pointer;padding:6px 0;border-radius:12px;transition:.2s}
-.tab svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:.2s}
-.tab svg.fill{fill:currentColor;stroke:none}
-.tab.active{color:var(--gold1)}
-.tab.active svg{transform:translateY(-1px) scale(1.1)}
-#toasts{position:fixed;top:calc(14px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:100;
-  display:flex;flex-direction:column;gap:8px;width:min(92vw,420px);pointer-events:none}
-.toast{background:rgba(20,20,30,.96);border:1px solid var(--border);border-left:3px solid var(--gold1);
-  padding:11px 14px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.5);animation:toastIn .25s ease}
-.toast.success{border-left-color:var(--green)}
-.toast.error{border-left-color:var(--red)}
-.toast.out{opacity:0;transform:translateY(-8px);transition:.3s}
-@keyframes toastIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
-.overlay{position:fixed;inset:0;background:rgba(5,5,10,.65);backdrop-filter:blur(4px);z-index:90;
-  display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:.25s}
-.overlay.open{opacity:1;pointer-events:auto}
-.sheet{width:100%;max-width:480px;background:#15151f;border:1px solid var(--border);border-bottom:0;
-  border-radius:22px 22px 0 0;padding:18px 18px calc(24px + env(safe-area-inset-bottom));
-  transform:translateY(40px);transition:.3s}
-.overlay.open .sheet{transform:none}
-.sheet-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.sheet-head h3{font-size:17px}
-.how-list{list-style:none;display:flex;flex-direction:column;gap:12px}
-.how-list li{display:flex;gap:10px;font-size:13.5px;color:#cfcfe0;line-height:1.45}
-#fx{position:fixed;inset:0;pointer-events:none;z-index:80}
+  :root {
+    --tg-theme-bg-color: #0f0f1a;
+    --tg-theme-text-color: #ffffff;
+    --tg-theme-hint-color: #8a8a9e;
+    --tg-theme-link-color: #7c5cff;
+    --tg-theme-button-color: #7c5cff;
+    --tg-theme-button-text-color: #ffffff;
+    --tg-theme-secondary-bg-color: #1a1a2e;
+  }
+  * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--tg-theme-bg-color, #0f0f1a);
+    color: var(--tg-theme-text-color, #fff);
+    overflow-x: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  body {
+    background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f0f1a 50%, #000 100%);
+    min-height: 100vh;
+    padding-bottom: 90px;
+  }
+  .glass {
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .coin-gradient {
+    background: conic-gradient(from 0deg, #fbbf24, #f59e0b, #fcd34d, #fbbf24);
+    box-shadow: 0 0 60px rgba(251, 191, 36, 0.4), inset 0 0 30px rgba(255,255,255,0.2);
+  }
+  .coin-pulse { animation: pulse 2.5s ease-in-out infinite; }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 60px rgba(251, 191, 36, 0.4), inset 0 0 30px rgba(255,255,255,0.2); transform: scale(1); }
+    50% { box-shadow: 0 0 90px rgba(251, 191, 36, 0.7), inset 0 0 30px rgba(255,255,255,0.3); transform: scale(1.02); }
+  }
+  .tap-anim:active { transform: scale(0.95); }
+  .tap-anim { transition: transform 0.1s ease; }
+  .ripple {
+    position: absolute; border-radius: 50%; background: rgba(251, 191, 36, 0.4);
+    animation: rippleAnim 0.8s ease-out forwards; pointer-events: none;
+  }
+  @keyframes rippleAnim {
+    0% { width: 0; height: 0; opacity: 0.8; }
+    100% { width: 300px; height: 300px; opacity: 0; }
+  }
+  .float-plus {
+    position: absolute; color: #fbbf24; font-weight: 700; font-size: 24px;
+    pointer-events: none; animation: floatUp 1s ease-out forwards;
+    text-shadow: 0 2px 10px rgba(251, 191, 36, 0.6);
+  }
+  @keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-80px) scale(1.3); }
+  }
+  .tab-active { color: #fbbf24; background: rgba(251, 191, 36, 0.1); }
+  .tab-active svg { stroke: #fbbf24; }
+  .gradient-text {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #fcd34d 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .gradient-btn {
+    background: linear-gradient(135deg, #7c5cff 0%, #5b3fd9 100%);
+    box-shadow: 0 8px 24px rgba(124, 92, 255, 0.4);
+  }
+  .gradient-btn:active { transform: scale(0.97); }
+  .progress-bar {
+    background: linear-gradient(90deg, #7c5cff, #fbbf24);
+    transition: width 0.6s ease;
+  }
+  .slide-in { animation: slideIn 0.3s ease-out; }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .toast {
+    animation: toastIn 0.3s ease-out, toastOut 0.3s ease-in 2s forwards;
+  }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes toastOut {
+    to { opacity: 0; transform: translateY(-20px); }
+  }
+  .level-ring {
+    background: conic-gradient(#fbbf24 var(--progress, 0%), rgba(255,255,255,0.1) 0%);
+  }
+  .shine { position: relative; overflow: hidden; }
+  .shine::after {
+    content: ''; position: absolute; top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    animation: shine 3s infinite;
+  }
+  @keyframes shine {
+    0% { left: -100%; }
+    50%, 100% { left: 100%; }
+  }
+  .streak-fire { animation: flicker 1.5s ease-in-out infinite alternate; }
+  @keyframes flicker {
+    from { transform: scale(1) rotate(-2deg); }
+    to { transform: scale(1.1) rotate(2deg); }
+  }
+  ::-webkit-scrollbar { display: none; }
+  * { scrollbar-width: none; }
+  
+  /* Loading overlay */
+  .loading-overlay {
+    position: fixed; inset: 0; background: rgba(15,15,26,0.9);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100; backdrop-filter: blur(10px);
+  }
+  .spinner {
+    width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1);
+    border-top-color: #7c5cff; border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  
+  /* Connection status */
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    display: inline-block; margin-right: 6px;
+  }
+  .status-online { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+  .status-offline { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
+  .status-syncing { background: #fbbf24; box-shadow: 0 0 8px #fbbf24; animation: pulse 1s infinite; }
 </style>
 </head>
 <body>
-<div id="app">
-  <header class="topbar">
-    <div class="user">
-      <div class="avatar"><img id="avatar-img" alt=""><span id="avatar-fb">G</span></div>
-      <div>
-        <div class="u-name" id="user-name">Guest</div>
-        <div class="u-lvl"><span id="user-lvl">Level 1</span>·<i class="dot" id="conn-dot"></i><span id="conn-text">…</span></div>
-      </div>
-    </div>
-    <button class="icon-btn" id="btn-info" title="How it works">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="7.8" r="1.1" fill="currentColor" stroke="none"/></svg>
-    </button>
-  </header>
 
-  <main>
-    <section id="screen-home" class="screen active">
-      <div class="balance-card card">
-        <div class="bal-label">Total Balance</div>
-        <div class="bal-row">
-          <svg class="bal-star" width="26" height="26" viewBox="0 0 24 24" fill="#ffd76a"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8L12 2z"/></svg>
-          <span class="num" id="bal-value">0</span>
-        </div>
-        <div class="lvl-row">
-          <span class="lvl-chip" id="lvl-chip">Lv 1</span>
-          <div class="lvl-bar"><i id="lvl-fill"></i></div>
-          <span class="lvl-text" id="lvl-text">0 / 100</span>
-        </div>
-      </div>
-
-      <div class="card daily-card">
-        <div class="daily-left">
-          <div class="flame">🔥</div>
-          <div><div class="d-title">Daily Bonus</div><div class="d-sub" id="daily-streak">Come back every day!</div></div>
-        </div>
-        <button class="btn small" id="btn-daily">Claim</button>
-      </div>
-
-      <div class="coin-area">
-        <div class="coin-glow"></div>
-        <div class="coin-wrap" id="coin-wrap">
-          <div class="coin-float">
-            <div class="coin" id="coin">
-              <svg class="coin-star" viewBox="0 0 24 24"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8L12 2z" fill="#c07a00" stroke="rgba(255,255,255,.35)" stroke-width=".6"/></svg>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card energy-card">
-        <div class="energy-top"><span>⚡ Energy</span><span id="energy-text">500 / 500</span></div>
-        <div class="energy-bar"><i id="energy-fill"></i></div>
-      </div>
-
-      <div class="stats-row">
-        <div class="stat"><div class="s-v" id="stat-taps">0</div><div class="s-l">Taps</div></div>
-        <div class="stat"><div class="s-v" id="stat-earned">0</div><div class="s-l">Earned</div></div>
-        <div class="stat"><div class="s-v" id="stat-refs">0</div><div class="s-l">Friends</div></div>
-      </div>
-    </section>
-
-    <section id="screen-tasks" class="screen">
-      <h2 class="sec-title">🎯 Tasks <span class="sec-hint">complete &amp; earn</span></h2>
-      <div id="task-list" class="list"></div>
-    </section>
-
-    <section id="screen-boost" class="screen">
-      <h2 class="sec-title">🚀 Boosters <span class="sec-hint">level up</span></h2>
-      <div id="boost-list" class="list"></div>
-      <p class="hint">Boosters multiply your earnings.<br>Cost grows with every level (max 10).</p>
-    </section>
-
-    <section id="screen-refs" class="screen">
-      <div class="card ref-hero">
-        <div class="rh-emoji">🎁</div>
-        <div class="rh-title">Invite friends — earn together!</div>
-        <div class="rh-sub" id="rh-sub"></div>
-      </div>
-      <div class="card">
-        <div style="font-weight:600;font-size:13px">Your referral link</div>
-        <div class="link-row">
-          <input id="ref-link" readonly>
-          <button class="icon-btn" id="btn-copy" title="Copy">
-            <svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
-          </button>
-        </div>
-        <button class="btn full" id="btn-share">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2.5 11 13"/><path d="M21.5 2.5 14.8 21l-3.8-8-8-3.7 18.5-6.8z"/></svg>
-          Share with friends
-        </button>
-      </div>
-      <div class="stats-row">
-        <div class="stat"><div class="s-v" id="refs-count">0</div><div class="s-l">Friends</div></div>
-        <div class="stat"><div class="s-v" id="refs-earned">0</div><div class="s-l">Ref points</div></div>
-      </div>
-      <h2 class="sec-title" style="margin-top:18px">👥 Your friends</h2>
-      <div id="friends-list" class="list"></div>
-      <button class="btn ghost full" id="btn-simref">+ Simulate a friend joining (demo)</button>
-    </section>
-
-    <section id="screen-top" class="screen">
-      <h2 class="sec-title">🏆 Leaderboard <span class="sec-hint">top players</span></h2>
-      <div id="board-list" class="list"></div>
-    </section>
-  </main>
-
-  <nav class="tabbar">
-    <button class="tab active" data-tab="home"><svg viewBox="0 0 24 24"><path d="M3.5 11 12 4l8.5 7"/><path d="M6 10.5V20h12v-9.5"/><path d="M10 20v-5h4v5"/></svg><span>Home</span></button>
-    <button class="tab" data-tab="tasks"><svg viewBox="0 0 24 24"><rect x="4.5" y="4" width="15" height="16.5" rx="3"/><path d="M9 3.5h6v3H9z"/><path d="m8.8 13 2.3 2.3 4.4-4.8"/></svg><span>Tasks</span></button>
-    <button class="tab" data-tab="boost"><svg viewBox="0 0 24 24" class="fill"><path d="M13 2 4.8 13.4h4.9L9.3 22l8.9-11.8h-5.2L13 2z"/></svg><span>Boost</span></button>
-    <button class="tab" data-tab="refs"><svg viewBox="0 0 24 24"><circle cx="9.5" cy="8.5" r="3.4"/><path d="M3.5 19.5c.7-3.2 3-5 6-5s5.3 1.8 6 5"/><circle cx="17" cy="9.5" r="2.6"/><path d="M16 14.7c2.5.2 4.2 1.8 4.7 4.3"/></svg><span>Friends</span></button>
-    <button class="tab" data-tab="top"><svg viewBox="0 0 24 24"><path d="M7 4h10v5.2a5 5 0 0 1-10 0V4z"/><path d="M7 5.5H4.2a2.6 2.6 0 0 0 2.9 3.6"/><path d="M17 5.5h2.8a2.6 2.6 0 0 1-2.9 3.6"/><path d="M12 14.5V17.5"/><path d="M8 20.5h8"/></svg><span>Top</span></button>
-  </nav>
-</div>
-
-<div class="overlay" id="overlay">
-  <div class="sheet">
-    <div class="sheet-head"><h3>How it works</h3><button class="icon-btn" id="btn-modal-close">✕</button></div>
-    <ul class="how-list">
-      <li>🪙<div><b>Tap the coin</b> to earn points. Each tap uses ⚡ energy, which recharges automatically over time.</div></li>
-      <li>🎁<div><b>Daily Bonus</b> — come back every day to grow your 🔥 streak and claim bigger rewards.</div></li>
-      <li>🎯<div><b>Tasks</b> — complete simple missions to earn bonus points.</div></li>
-      <li>👥<div><b>Invite friends</b> — earn <b>+5 points</b> for every friend who joins through your link.</div></li>
-      <li>🚀<div><b>Boosters</b> — spend points to tap harder, store more energy and recharge faster.</div></li>
-    </ul>
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay">
+  <div class="text-center">
+    <div class="spinner mx-auto mb-4"></div>
+    <div class="text-sm opacity-60">Connecting to server...</div>
   </div>
 </div>
 
-<div id="toasts"></div>
-<canvas id="fx"></canvas>
+<!-- Toast container -->
+<div id="toastContainer" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2"></div>
 
-<script>
-(() => {
-'use strict';
-
-/* ======================= CONFIG — EDIT THESE! ======================= */
-const CONFIG = {
-  // ⚠️ STEP 1: Open your Worker URL in a browser, copy it, paste it below.
-  // It looks like: https://coinrush-api.xxxx.workers.dev  (NO slash at the end!)
-  API_URL: 'http://coinrush-api.ebisamagarsaa.workers.dev',
-
-  botUsername: 'EbisaNewMiniappBot',   // ✅ your bot — referral links use this
-
-  referralReward: 5,
-  streakRewards: [15, 25, 40, 60, 90, 130, 200],
-  levels: [0, 100, 250, 500, 1000, 2500, 5000, 10000, 25000, 50000],
-  maxBoostLevel: 10,
-  linkTaskDelayMs: 8000,
-  pollMs: 5000,      // server sync interval
-  tapFlushMs: 2000,  // send taps to server in batches
-};
-// Keep this list in sync with TASKS in the Worker!
-const TASKS = [
-  { id:'tg_channel', icon:'📢', title:'Join our Telegram Channel', reward:50, type:'link', url:'https://t.me/telegram' },
-  { id:'x_follow',   icon:'𝕏', title:'Follow us on X (Twitter)',   reward:30, type:'link', url:'https://x.com/telegram' },
-  { id:'discord',    icon:'🎮', title:'Join our Discord Server',   reward:30, type:'link', url:'https://discord.com' },
-  { id:'notify',     icon:'🔔', title:'Turn on notifications',     reward:15, type:'action' },
-  { id:'invite_3',   icon:'👥', title:'Invite 3 friends',          reward:100, type:'progress', goal:3,   metric:'refs' },
-  { id:'tap_500',    icon:'🎯', title:'Make 500 taps',             reward:80,  type:'progress', goal:500, metric:'taps' },
-  { id:'streak_3',   icon:'🔥', title:'Reach a 3-day bonus streak',reward:150, type:'progress', goal:3,   metric:'streak' },
-];
-
-/* ======================= TELEGRAM ======================= */
-const tg = window.Telegram && window.Telegram.WebApp;
-const tgSafe = fn => { try { fn && fn(); } catch(e){} };
-if (tg) {
-  tgSafe(() => tg.ready());
-  tgSafe(() => tg.expand());
-  tgSafe(() => tg.setHeaderColor('#0b0b12'));
-  tgSafe(() => tg.setBackgroundColor('#0b0b12'));
-  tgSafe(() => tg.disableVerticalSwipes && tg.disableVerticalSwipes());
-}
-const INIT_DATA = (tg && tg.initData) || '';
-const IS_TG = INIT_DATA.length > 0;
-
-/* ======================= BACKENDS (same interface) ======================= */
-const Remote = {
-  async req(path, body, opts = {}){
-    const res = await fetch(CONFIG.API_URL + path, {
-      method: body !== undefined ? 'POST' : 'GET',
-      headers: { 'content-type': 'application/json', 'x-init-data': INIT_DATA },
-      body: body !== undefined ? JSON.stringify(body) : undefined,
-      keepalive: !!opts.keepalive,
-    });
-    let data = {};
-    try { data = await res.json(); } catch(e){}
-    if (!res.ok || data.ok === false) throw new Error(data.error || 'api_error');
-    return data;
-  },
-  auth:      ()  => Remote.req('/auth', {}),
-  taps:      n   => Remote.req('/taps', { count: n }, { keepalive: true }),
-  daily:     ()  => Remote.req('/daily', {}),
-  taskStart: id  => Remote.req('/task/start', { id }),
-  taskCheck: id  => Remote.req('/task/check', { id }),
-  boost:     key => Remote.req('/boost', { key }),
-  state:     ()  => Remote.req('/state'),
-  board:     ()  => Remote.req('/leaderboard'),
-};
-
-function makeLocalBackend(){ // browser demo fallback (no server)
-  const KEY = 'coinrush_demo_v2', DAY = 86400000;
-  const defs = () => ({
-    user: { id: 777000, name: 'Guest', username: null, photo: null },
-    balance: 0, totalEarned: 0, taps: 0,
-    energy: 500, energyTs: Date.now(), maxEnergy: 500, recharge: 1, perTap: 1,
-    multitapLevel: 1, energyLevel: 1, rechargeLevel: 1,
-    streak: 0, lastClaim: null, invitedBy: null,
-    refCount: 0, refEarned: 0, refs: [], rank: 42, tasks: {}, serverTime: Date.now(),
-  });
-  let S;
-  try { const r = localStorage.getItem(KEY); S = r ? JSON.parse(r) : defs(); } catch(e){ S = defs(); }
-  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} };
-  const regen = () => {
-    const now = Date.now(), dt = (now - S.energyTs) / 1000;
-    if (dt > 0){ S.energy = Math.min(S.maxEnergy, S.energy + dt * S.recharge); S.energyTs = now; }
-  };
-  const out = extra => { S.serverTime = Date.now(); save(); return { ok: true, ...extra, ...S }; };
-  return {
-    async auth(sp){ if (sp && sp.startsWith('ref_') && !S.invitedBy){ S.invitedBy = sp.slice(4); } return out({}); },
-    async taps(n){
-      regen();
-      const applied = Math.min(n, Math.floor(S.energy));
-      S.energy -= applied; S.taps += applied;
-      S.balance += applied * S.perTap; S.totalEarned += applied * S.perTap;
-      return out({ applied });
-    },
-    async daily(){
-      regen();
-      const today = Math.floor(Date.now() / DAY);
-      const lastDay = S.lastClaim ? Math.floor(S.lastClaim / DAY) : null;
-      if (lastDay === today) return { ok: false, error: 'already_claimed', nextClaim: (today + 1) * DAY };
-      S.streak = lastDay === today - 1 ? S.streak + 1 : 1;
-      const reward = CONFIG.streakRewards[Math.min(S.streak, CONFIG.streakRewards.length) - 1];
-      S.lastClaim = Date.now(); S.balance += reward; S.totalEarned += reward;
-      return out({ reward, streak: S.streak });
-    },
-    async taskStart(id){
-      const t = S.tasks[id] || (S.tasks[id] = {});
-      if (!t.status || t.status === 'none'){ t.status = 'started'; t.startedAt = Date.now(); }
-      return out({});
-    },
-    async taskCheck(id){
-      const t = TASKS.find(x => x.id === id); const st = S.tasks[id] || {};
-      if (st.status === 'done') return out({ already: true });
-      if (t.type === 'progress'){
-        const val = t.metric === 'taps' ? S.taps : t.metric === 'refs' ? S.refCount : S.streak;
-        if (val < t.goal) return { ok: false, error: 'not_ready', progress: val, goal: t.goal };
-      } else if (t.type === 'link'){
-        if (st.status !== 'started') return { ok: false, error: 'not_started' };
-        if (Date.now() - st.startedAt < CONFIG.linkTaskDelayMs) return { ok: false, error: 'not_ready' };
-      }
-      st.status = 'done'; st.completedAt = Date.now();
-      S.balance += t.reward; S.totalEarned += t.reward;
-      return out({ reward: t.reward });
-    },
-    async boost(key){
-      const map = {
-        multitap: ['multitapLevel', l => 100 * l, 'perTap',   l => 1 + (l - 1)],
-        energy:   ['energyLevel',   l => 80 * l,  'maxEnergy',l => 500 + 250 * (l - 1)],
-        recharge: ['rechargeLevel', l => 150 * l, 'recharge', l => 1 + 0.5 * (l - 1)],
-      };
-      const [col, cost, field, val] = map[key];
-      if (S[col] >= CONFIG.maxBoostLevel) return { ok: false, error: 'maxed' };
-      const c = cost(S[col]);
-      if (S.balance < c) return { ok: false, error: 'no_funds', cost: c };
-      S.balance -= c; S[col]++; S[field] = val(S[col]);
-      return out({});
-    },
-    async state(){ regen(); return out({}); },
-    async board(){
-      const rows = [['CryptoKing',12480],['Luna',9870],['MaxPower',7350],['Aisha',6120],['Ivan',4890],['Sara',3540],['Neo',2210],['Olga',1450]]
-        .map(([name, value]) => ({ name, value }));
-      return { ok: true, rows, me: { id: S.user.id, rank: 42 } };
-    },
-    _simRef(name){
-      S.refCount++; S.refEarned += CONFIG.referralReward;
-      S.refs.push({ id: Date.now(), name, date: Date.now() });
-      S.balance += CONFIG.referralReward; S.totalEarned += CONFIG.referralReward;
-      return out({});
-    },
-  };
-}
-
-const BE = IS_TG ? Remote : makeLocalBackend();
-
-/* ======================= HELPERS ======================= */
-const $ = id => document.getElementById(id);
-const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const pad = n => String(n).padStart(2,'0');
-function fmt(n){ n = Math.floor(n);
-  if (n >= 1e6) return (n/1e6).toFixed(1).replace(/\.0$/,'') + 'M';
-  if (n >= 1e4) return (n/1e3).toFixed(1).replace(/\.0$/,'') + 'K';
-  return n.toLocaleString('en-US'); }
-function fmtDate(ts){ return new Date(ts).toLocaleDateString(undefined,{month:'short',day:'numeric'}); }
-function initials(n){ const w = String(n||'?').trim().split(/\s+/); return (w[0][0] + (w[1] ? w[1][0] : '')).toUpperCase(); }
-function clock(ms){ ms = Math.max(0, ms); const s = Math.floor(ms/1000);
-  return pad(Math.floor(s/3600)) + ':' + pad(Math.floor(s%3600/60)) + ':' + pad(s%60); }
-function starSvg(s=12){ return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="#ffd76a"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8L12 2z"/></svg>`; }
-function haptic(type, style){
-  tgSafe(() => {
-    const H = tg.HapticFeedback;
-    if (type==='impact') H.impactOccurred(style||'light');
-    else if (type==='notif') H.notificationOccurred(style||'success');
-    else H.selectionChanged();
-  });
-}
-function openLink(url){
-  try{
-    if (tg && url.includes('t.me')) tg.openTelegramLink(url);
-    else if (tg) tg.openLink(url);
-    else window.open(url, '_blank');
-  }catch(e){ window.open(url, '_blank'); }
-}
-function toast(msg, type='info'){
-  const box = $('toasts');
-  if (box.children.length >= 3) box.firstChild.remove();
-  const t = document.createElement('div');
-  t.className = 'toast ' + type;
-  t.innerHTML = msg;
-  box.appendChild(t);
-  setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 320); }, 2600);
-}
-
-/* Confetti */
-const fx = $('fx'), fctx = fx.getContext('2d');
-function resizeFx(){ fx.width = innerWidth; fx.height = innerHeight; }
-addEventListener('resize', resizeFx); resizeFx();
-let parts = [], fxOn = false;
-const FX_COLORS = ['#ffd76a','#ffb02e','#ff8a00','#8b7cf7','#ffffff','#3ddc84'];
-function burst(x, y, n=60){
-  for (let i=0;i<n;i++){
-    const a = Math.random()*Math.PI*2, sp = 2+Math.random()*6;
-    parts.push({ x, y, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp-3.5, g:.18,
-      rot:Math.random()*Math.PI, vr:(Math.random()-.5)*.3,
-      s:4+Math.random()*6, c:FX_COLORS[(Math.random()*FX_COLORS.length)|0], l:50+Math.random()*40 });
-  }
-  if (!fxOn){ fxOn = true; requestAnimationFrame(fxLoop); }
-}
-function fxLoop(){
-  fctx.clearRect(0,0,fx.width,fx.height);
-  parts = parts.filter(p => p.l > 0);
-  for (const p of parts){
-    p.x+=p.vx; p.y+=p.vy; p.vy+=p.g; p.rot+=p.vr; p.l--;
-    fctx.save(); fctx.translate(p.x,p.y); fctx.rotate(p.rot);
-    fctx.globalAlpha = Math.min(1, p.l/25); fctx.fillStyle = p.c;
-    fctx.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6); fctx.restore();
-  }
-  if (parts.length) requestAnimationFrame(fxLoop);
-  else { fxOn = false; fctx.clearRect(0,0,fx.width,fx.height); }
-}
-function burstAt(el, n=50){
-  if (!el) return;
-  const r = el.getBoundingClientRect();
-  burst(r.left + r.width/2, r.top + r.height/2, n);
-}
-
-/* ======================= STATE / SYNC ======================= */
-let S = null;                 // authoritative state (from backend)
-let lastTick = Date.now();    // local energy regen clock
-
-function setConn(mode){
-  const d = $('conn-dot'), t = $('conn-text');
-  d.className = 'dot' + (mode === 'demo' ? ' demo' : mode === 'offline' ? ' off' : '');
-  t.textContent = mode === 'online' ? 'Online' : mode === 'demo' ? 'Demo' : mode === 'offline' ? 'Offline' : '…';
-}
-
-function reconcile(res){
-  const prevRefs = S ? (S.refCount || 0) : 0;
-  S = res;
-  lastTick = Date.now();
-  if ((S.refCount || 0) > prevRefs){
-    setTimeout(() => {
-      toast(`🎉 A friend joined with your link! <b>+${CONFIG.referralReward}</b> pts`, 'success');
-      burstAt($('coin'), 60); haptic('notif','success');
-    }, 60);
-  }
-  updateHUD(); renderTasks(); renderBoost(); renderRefs();
-  ensureProgressTasks();
-}
-
-async function pollState(){
-  if (document.hidden || !S || flushing) return;
-  try { reconcile(await BE.state()); } catch(e){}
-}
-
-const metricVal = t => t.metric === 'taps' ? S.taps : t.metric === 'refs' ? S.refCount : S.streak;
-async function ensureProgressTasks(){
-  for (const t of TASKS){
-    if (t.type !== 'progress') continue;
-    const st = (S.tasks && S.tasks[t.id]) || {};
-    if (st.status !== 'done' && metricVal(t) >= t.goal){
-      try { reconcile(await BE.taskCheck(t.id)); } catch(e){}
-    }
-  }
-}
-
-/* ======================= BALANCE / LEVELS / ENERGY ======================= */
-function levelInfo(){
-  const t = S ? S.totalEarned : 0;
-  let i = 0;
-  for (let k=0;k<CONFIG.levels.length;k++) if (t >= CONFIG.levels[k]) i = k;
-  const cur = CONFIG.levels[i], next = CONFIG.levels[i+1];
-  return { level: i+1, cur, next, pct: next ? Math.min(1,(t-cur)/(next-cur)) : 1, max: !next };
-}
-let shownBal = 0, balRaf = null;
-function animateBalance(){
-  cancelAnimationFrame(balRaf);
-  const from = shownBal, to = S.balance;
-  if (from === to){ $('bal-value').textContent = fmt(to); return; }
-  const t0 = performance.now(), dur = 350;
-  const step = t => {
-    const k = Math.min(1,(t-t0)/dur), e = 1-Math.pow(1-k,3);
-    shownBal = from + (to-from)*e;
-    $('bal-value').textContent = fmt(shownBal);
-    if (k < 1) balRaf = requestAnimationFrame(step);
-    else { shownBal = to; $('bal-value').textContent = fmt(to); }
-  };
-  balRaf = requestAnimationFrame(step);
-}
-function localRegen(){
-  const now = Date.now(), dt = (now - lastTick) / 1000;
-  lastTick = now;
-  if (dt > 0 && S) S.energy = Math.min(S.maxEnergy, S.energy + dt * S.recharge);
-}
-function updateHeader(){
-  const u = (S && S.user) || (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) || { name: 'Guest' };
-  const nm = u.name || [u.first_name, u.last_name].filter(Boolean).join(' ') || 'Guest';
-  $('user-name').textContent = nm;
-  $('user-lvl').textContent = 'Level ' + levelInfo().level;
-  const img = $('avatar-img'), fb = $('avatar-fb');
-  const photo = u.photo_url || u.photo;
-  if (photo){ img.src = photo; img.style.display = 'block'; fb.style.display = 'none'; }
-  else { img.style.display = 'none'; fb.style.display = 'block'; fb.textContent = nm[0].toUpperCase(); }
-}
-function updateHUD(){
-  if (!S) return;
-  updateHeader();
-  animateBalance();
-  const li = levelInfo();
-  $('lvl-chip').textContent = 'Lv ' + li.level;
-  $('lvl-fill').style.width = (li.pct*100) + '%';
-  $('lvl-text').textContent = li.max ? 'MAX LEVEL' : `${fmt(S.totalEarned)} / ${fmt(li.next)}`;
-  $('energy-fill').style.width = Math.max(0, Math.min(100, S.energy / S.maxEnergy * 100)) + '%';
-  $('energy-text').textContent = `${Math.floor(S.energy)} / ${S.maxEnergy}`;
-  $('stat-taps').textContent = fmt(S.taps);
-  $('stat-earned').textContent = fmt(S.totalEarned);
-  $('stat-refs').textContent = S.refCount;
-  renderDaily();
-}
-
-/* ======================= DAILY BONUS ======================= */
-const DAY = 86400000;
-function dailyInfo(){
-  const today = Math.floor(Date.now() / DAY);
-  const lastDay = S.lastClaim ? Math.floor(S.lastClaim / DAY) : null;
-  const claimedToday = lastDay === today;
-  const nextDay = claimedToday ? S.streak : (lastDay === today - 1 ? S.streak + 1 : 1);
-  return { claimedToday, nextClaim: claimedToday ? (lastDay + 1) * DAY : 0, nextDay,
-    reward: CONFIG.streakRewards[Math.min(nextDay, CONFIG.streakRewards.length) - 1] };
-}
-function renderDaily(){
-  const info = dailyInfo(), btn = $('btn-daily');
-  if (info.claimedToday){
-    $('daily-streak').textContent = `Streak: ${S.streak} day${S.streak===1?'':'s'} 🔥`;
-    btn.disabled = true;
-    btn.textContent = '⏳ ' + clock(info.nextClaim - Date.now());
-  } else {
-    $('daily-streak').textContent = `Day ${info.nextDay} reward: +${info.reward} pts`;
-    btn.disabled = false;
-    btn.textContent = `Claim +${info.reward}`;
-  }
-}
- $('btn-daily').addEventListener('click', async () => {
-  const btn = $('btn-daily');
-  if (btn.disabled) return;
-  btn.disabled = true; btn.textContent = '…';
-  try {
-    const res = await BE.daily();
-    if (res.ok === false){
-      toast('⏳ Already claimed today', 'error'); syncAfter();
-    } else {
-      burstAt(btn, 70);
-      toast(`🎁 Day ${res.streak} bonus claimed: <b>+${res.reward}</b> pts!`, 'success');
-      haptic('notif','success');
-      reconcile(res);
-    }
-  } catch(e){ toast('Connection error — try again', 'error'); btn.disabled = false; renderDaily(); }
-});
-async function syncAfter(){ try { reconcile(await BE.state()); } catch(e){} }
-
-/* ======================= TASKS ======================= */
-const taskState = id => (S.tasks && S.tasks[id]) || {};
-let taskSig = '';
-function renderTasks(){
-  if (!S) return;
-  const sig = JSON.stringify([S.tasks, S.taps, S.refCount, S.streak]);
-  if (sig === taskSig) return;
-  taskSig = sig;
-  const wrap = $('task-list'); wrap.innerHTML = '';
-  const rank = t => taskState(t.id).status === 'done' ? 2 : t.type === 'progress' ? 1 : 0;
-  [...TASKS].sort((a,b)=>rank(a)-rank(b)).forEach(t => {
-    const st = taskState(t.id);
-    const el = document.createElement('div');
-    el.className = 'task card' + (st.status === 'done' ? ' done' : '');
-    let right = '';
-    if (st.status === 'done'){
-      right = `<button class="btn small done" disabled>✓ Done</button>`;
-    } else if (t.type === 'progress'){
-      const p = Math.min(metricVal(t), t.goal);
-      right = `<span class="t-count">${p}/${t.goal}</span>`;
-    } else if (st.status === 'started'){
-      right = `<button class="btn small" data-action="check" data-id="${t.id}" ${Date.now() < st.startedAt + CONFIG.linkTaskDelayMs ? 'disabled data-ready="' + (st.startedAt + CONFIG.linkTaskDelayMs) + '"' : ''}>Check</button>`;
-    } else {
-      right = `<button class="btn small ghost" data-action="start" data-id="${t.id}">Start</button>`;
-    }
-    const bar = t.type === 'progress'
-      ? `<div class="mini-bar"><i style="width:${Math.min(metricVal(t)/t.goal,1)*100}%"></i></div>` : '';
-    el.innerHTML = `
-      <div class="t-icon">${t.icon}</div>
-      <div class="t-body">
-        <div class="t-title">${t.title}</div>
-        <div class="t-reward">${starSvg(12)} +${t.reward}</div>
-        ${bar}
-      </div>${right}`;
-    wrap.appendChild(el);
-  });
-}
- $('task-list').addEventListener('click', async e => {
-  const btn = e.target.closest('button[data-action]');
-  if (!btn || btn.disabled) return;
-  const t = TASKS.find(x => x.id === btn.dataset.id);
-  if (btn.dataset.action === 'start'){
-    taskState(t.id).status = 'started';
-    taskState(t.id).startedAt = Date.now();
-    renderTasks();
-    try { await BE.taskStart(t.id); } catch(err){}
-    if (t.url) openLink(t.url);
-    haptic('select');
-  } else {
-    btn.disabled = true; btn.textContent = 'Checking…';
-    try {
-      const res = await BE.taskCheck(t.id);
-      if (res.ok === false){
-        const msgs = {
-          not_ready:  res.goal ? `Not yet — progress ${res.progress}/${res.goal}` : '⏳ Not ready yet — wait a few seconds',
-          not_started:'Press Start first!',
-          must_join:  'Join the channel first! 👀',
-        };
-        toast(msgs[res.error] || 'Not ready yet', 'error');
-        btn.disabled = false; btn.textContent = 'Check';
-        if (res.error === 'not_started') syncAfter();
-      } else if (res.already){
-        syncAfter();
-      } else {
-        toast(`✅ ${t.title} · <b>+${res.reward}</b> pts`, 'success');
-        haptic('notif','success');
-        burstAt(btn, 36);
-        reconcile(res);
-      }
-    } catch(err){ toast('Connection error', 'error'); btn.disabled = false; btn.textContent = 'Check'; }
-  }
-});
-
-/* ======================= BOOSTERS ======================= */
-const BOOST_DEFS = [
-  { key:'multitap', col:'multitapLevel', icon:'👆', name:'Multi Tap',      val:l=>`${1+(l-1)} pts/tap`,          cost:l=>100*l },
-  { key:'energy',   col:'energyLevel',   icon:'🔋', name:'Energy Limit',   val:l=>`${500+250*(l-1)} max`,        cost:l=>80*l  },
-  { key:'recharge', col:'rechargeLevel', icon:'⚡', name:'Recharge Speed', val:l=>`${(1+0.5*(l-1)).toFixed(1)}/sec`, cost:l=>150*l },
-];
-function renderBoost(){
-  if (!S) return;
-  const wrap = $('boost-list'); wrap.innerHTML = '';
-  for (const b of BOOST_DEFS){
-    const lvl = S[b.col], maxed = lvl >= CONFIG.maxBoostLevel, cost = b.cost(lvl);
-    const el = document.createElement('div');
-    el.className = 'boost card';
-    el.innerHTML = `
-      <div class="t-icon">${b.icon}</div>
-      <div class="t-body">
-        <div class="t-title">${b.name} <span class="lvl-pill">Lv ${lvl}</span></div>
-        <div class="t-sub">${b.val(lvl)} → ${maxed ? 'MAX' : b.val(lvl+1)}</div>
+<!-- Header -->
+<header class="sticky top-0 z-40 glass px-4 py-3 flex items-center justify-between">
+  <div class="flex items-center gap-2">
+    <div class="w-9 h-9 rounded-full coin-gradient flex items-center justify-center font-bold text-black">C</div>
+    <div>
+      <div class="text-xs opacity-60 flex items-center">
+        <span id="connectionStatus" class="status-dot status-offline"></span>
+        <span id="statusText">Offline</span>
       </div>
-      <button class="btn small" ${maxed ? 'disabled' : ''}>${maxed ? 'MAX' : starSvg(11) + ' ' + fmt(cost)}</button>`;
-    const btn = el.querySelector('button');
-    if (!maxed){
-      if (S.balance < cost) btn.disabled = true;
-      btn.addEventListener('click', async () => {
-        btn.disabled = true;
-        try {
-          const res = await BE.boost(b.key);
-          if (res.ok === false){
-            toast(res.error === 'maxed' ? 'Max level reached!' : 'Not enough points!', 'error');
-            haptic('notif','error'); renderBoost();
-          } else {
-            toast(`🚀 ${b.name} upgraded to Lv ${res[b.col]}!`, 'success');
-            haptic('notif','success');
-            reconcile(res);
-          }
-        } catch(err){ toast('Connection error', 'error'); btn.disabled = false; }
-      });
-    }
-    wrap.appendChild(el);
-  }
-}
+      <div class="text-sm font-semibold" id="userName">Player</div>
+    </div>
+  </div>
+  <div class="flex items-center gap-2">
+    <div class="glass rounded-full px-3 py-1.5 flex items-center gap-1.5">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M8 12h8"/></svg>
+      <span class="text-sm font-bold" id="headerBalance">0</span>
+    </div>
+    <button onclick="showSettings()" class="w-9 h-9 rounded-full glass flex items-center justify-center tap-anim">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </div>
+</header>
 
-/* ======================= REFERRALS ======================= */
-function refLink(){
-  const uid = (S && S.user && S.user.id) || 'demo';
-  return `https://t.me/${CONFIG.botUsername}?startapp=ref_${uid}`;
-}
-function renderRefs(){
-  if (!S) return;
-  $('rh-sub').innerHTML = `Get <b>+${CONFIG.referralReward} points</b> for every friend who joins through your link.`;
-  $('ref-link').value = refLink();
-  $('refs-count').textContent = S.refCount;
-  $('refs-earned').textContent = fmt(S.refEarned);
-  const list = $('friends-list');
-  if (!(S.refs || []).length){
-    list.innerHTML = `<div class="empty">No friends yet — share your link! 🚀</div>`;
-    return;
-  }
-  list.innerHTML = '';
-  [...S.refs].reverse().forEach(f => {
-    const colors = ['#ffb02e','#8b7cf7','#3ddc84','#ff5c7a','#5ad1ff'];
-    const el = document.createElement('div');
-    el.className = 'friend card';
-    el.innerHTML = `
-      <div class="f-av" style="background:${colors[Math.abs(String(f.id).charCodeAt(0)) % colors.length]}">${initials(f.name)}</div>
-      <div class="t-body"><div class="t-title">${esc(f.name)}</div><div class="t-sub">${fmtDate(f.date)}</div></div>
-      <span class="t-count plus">+${CONFIG.referralReward}</span>`;
-    list.appendChild(el);
-  });
-}
- $('btn-copy').addEventListener('click', async () => {
-  const link = refLink();
-  let ok = false;
-  try{ await navigator.clipboard.writeText(link); ok = true; }
-  catch(e){
-    try{
-      const ta = document.createElement('textarea');
-      ta.value = link; document.body.appendChild(ta); ta.select();
-      document.execCommand('copy'); ta.remove(); ok = true;
-    }catch(_){}
-  }
-  toast(ok ? '✅ Referral link copied!' : 'Copy failed — long-press the link instead', ok ? 'success' : 'error');
-  if (ok) haptic('notif','success');
-});
- $('btn-share').addEventListener('click', () => {
-  const msg = '🪙 Join me on CoinRush! Tap the coin, complete tasks and earn points together!';
-  openLink(`https://t.me/share/url?url=${encodeURIComponent(refLink())}&text=${encodeURIComponent(msg)}`);
-});
-const DEMO_NAMES = ['Alex','Maria','Dmitry','Sofia','Jake','Emma','Nina','Omar','Lena','Tariq'];
- $('btn-simref').addEventListener('click', () => {
-  const name = DEMO_NAMES[(Math.random()*DEMO_NAMES.length)|0];
-  reconcile(BE._simRef(name));
-});
+<!-- Main content -->
+<main id="mainContent" class="px-4 pt-4">
+  <!-- HOME TAB -->
+  <section id="tab-home" class="tab-content">
+    <div class="glass rounded-3xl p-5 mb-4 shine">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <div class="text-xs opacity-60 uppercase tracking-wider">Your Balance</div>
+          <div class="flex items-baseline gap-2 mt-1">
+            <span class="text-4xl font-black gradient-text" id="balanceDisplay">0</span>
+            <span class="text-lg opacity-60">CTC</span>
+          </div>
+        </div>
+        <div class="text-right">
+          <div class="text-xs opacity-60">Level <span id="levelDisplay">1</span></div>
+          <div class="text-sm font-semibold" id="levelName">Newbie</div>
+        </div>
+      </div>
+      <div class="h-1.5 rounded-full bg-white/10 overflow-hidden">
+        <div id="levelProgress" class="h-full progress-bar" style="width: 0%"></div>
+      </div>
+      <div class="flex justify-between text-xs opacity-60 mt-1.5">
+        <span id="currentLevelPts">0</span>
+        <span id="nextLevelPts">1,000</span>
+      </div>
+    </div>
 
-/* ======================= LEADERBOARD ======================= */
-async function renderBoard(){
-  const wrap = $('board-list');
-  wrap.innerHTML = `<div class="empty">Loading…</div>`;
-  let rows = [], me = null;
-  try { const res = await BE.board(); rows = res.rows || []; me = res.me; } catch(e){}
-  if (me && !rows.some(r => r.id === me.id))
-    rows.push({ id: me.id, name: (S && S.user && S.user.name) || 'You', value: S ? S.totalEarned : 0, rank: me.rank, me: true });
-  rows.sort((a,b) => (b.value||0) - (a.value||0));
-  wrap.innerHTML = '';
-  rows.forEach((r,i) => {
-    const rank = r.rank || i + 1;
-    const el = document.createElement('div');
-    el.className = 'row card' + (r.me ? ' me' : '');
-    const medal = rank===1 ? '🥇' : rank===2 ? '🥈' : rank===3 ? '🥉' : `<span class="rank-wrap">${rank}</span>`;
-    el.innerHTML = `
-      ${r.me ? `<span class="rank-wrap" style="color:var(--gold1)">${rank}</span>` : medal}
-      <div class="f-av" style="background:${r.me ? 'linear-gradient(135deg,#ffd76a,#ff8a00);color:#231a05' : '#2a2a3a'}">${initials(r.name)}</div>
-      <div class="t-body"><div class="t-title">${esc(r.name)}${r.me ? '<span class="you-pill" style="background:var(--gold1);color:#231a05;font-size:9px;padding:2px 7px;border-radius:99px;font-weight:800;margin-left:5px">You</span>' : ''}</div></div>
-      <div class="t-count">${fmt(r.value)}</div>`;
-    wrap.appendChild(el);
-  });
-}
+    <div class="glass rounded-3xl p-6 mb-4 flex flex-col items-center relative overflow-hidden">
+      <div class="text-xs opacity-60 uppercase tracking-wider mb-2">Tap to Earn</div>
+      <div class="text-sm mb-4">+<span id="tapReward">1</span> per tap</div>
+      <div id="coinContainer" class="relative cursor-pointer" style="width: 220px; height: 220px;">
+        <div id="coin" class="w-full h-full rounded-full coin-gradient coin-pulse flex items-center justify-center tap-anim">
+          <div class="w-[85%] h-[85%] rounded-full bg-gradient-to-br from-yellow-300 to-yellow-600 flex items-center justify-center shadow-inner">
+            <div class="text-6xl font-black text-yellow-900" style="text-shadow: 0 2px 4px rgba(0,0,0,0.2);">C</div>
+          </div>
+        </div>
+      </div>
+      <div class="mt-4 text-xs opacity-60">Energy: <span id="energyDisplay">1000</span> / 1000</div>
+      <div class="w-full h-1.5 rounded-full bg-white/10 overflow-hidden mt-1.5">
+        <div id="energyBar" class="h-full progress-bar" style="width: 100%"></div>
+      </div>
+    </div>
 
-/* ======================= TAP TO EARN (batched) ======================= */
-let pending = 0, flushing = false, flushTimer = 0, noEnergyAt = 0;
- $('coin').addEventListener('pointerdown', e => {
-  e.preventDefault();
-  if (!S) return;
-  localRegen();
-  if (S.energy < 1){
-    const c = $('coin');
-    c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake');
-    haptic('notif','error');
-    if (Date.now() - noEnergyAt > 1500){
-      toast('⚡ Not enough energy — it recharges over time!', 'error');
-      noEnergyAt = Date.now();
-    }
-    return;
-  }
-  S.energy -= 1; S.taps++; S.balance += S.perTap; S.totalEarned += S.perTap;
-  pending++;
-  const wrap = $('coin-wrap'), r = wrap.getBoundingClientRect();
-  const fl = document.createElement('div');
-  fl.className = 'float-pts';
-  fl.textContent = '+' + S.perTap;
-  fl.style.left = (e.clientX - r.left) + 'px';
-  fl.style.top  = (e.clientY - r.top) + 'px';
-  wrap.appendChild(fl);
-  setTimeout(() => fl.remove(), 900);
-  const c = $('coin');
-  c.classList.add('pressed');
-  clearTimeout(c._pt);
-  c._pt = setTimeout(() => c.classList.remove('pressed'), 110);
-  haptic('impact','light');
-  updateHUD(); taskSig = ''; renderTasks(); ensureProgressTasks();
-  if (!flushTimer) flushTimer = setTimeout(flushTaps, CONFIG.tapFlushMs);
-});
-async function flushTaps(){
-  flushTimer = 0;
-  if (!pending || flushing){ if (pending && !flushTimer) flushTimer = setTimeout(flushTaps, 400); return; }
-  const n = pending; pending = 0; flushing = true;
-  try {
-    reconcile(await BE.taps(n));
-  } catch(e){ pending += n; }   // retry shortly
-  finally { flushing = false; if (pending) flushTimer = setTimeout(flushTaps, 400); }
-}
-addEventListener('pagehide', () => { if (pending) flushTaps(); });
+    <div class="grid grid-cols-3 gap-3 mb-4">
+      <div class="glass rounded-2xl p-3 text-center">
+        <div class="text-2xl mb-1">🔥</div>
+        <div class="text-lg font-bold" id="streakDisplay">0</div>
+        <div class="text-xs opacity-60">Day Streak</div>
+      </div>
+      <div class="glass rounded-2xl p-3 text-center">
+        <div class="text-2xl mb-1">👥</div>
+        <div class="text-lg font-bold" id="invitesDisplay">0</div>
+        <div class="text-xs opacity-60">Invites</div>
+      </div>
+      <div class="glass rounded-2xl p-3 text-center">
+        <div class="text-2xl mb-1">⚡</div>
+        <div class="text-lg font-bold" id="tapsDisplay">0</div>
+        <div class="text-xs opacity-60">Total Taps</div>
+      </div>
+    </div>
+  </section>
 
-/* ======================= NAV / MODAL / TICK ======================= */
-let currentTab = 'home';
-document.querySelectorAll('.tabbar .tab').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const id = btn.dataset.tab;
-    if (id === currentTab) return;
-    currentTab = id;
-    haptic('select');
-    document.querySelectorAll('.tabbar .tab').forEach(b => b.classList.toggle('active', b === btn));
-    document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === 'screen-' + id));
-    ({ home: () => {}, tasks: renderTasks, boost: renderBoost, refs: renderRefs, top: renderBoard })[id]?.();
-    const sc = $('screen-' + id); if (sc) sc.scrollTop = 0;
-  });
-});
- $('btn-info').addEventListener('click', () => $('overlay').classList.add('open'));
- $('btn-modal-close').addEventListener('click', () => $('overlay').classList.remove('open'));
- $('overlay').addEventListener('click', e => { if (e.target.id === 'overlay') $('overlay').classList.remove('open'); });
+  <!-- TASKS TAB -->
+  <section id="tab-tasks" class="tab-content hidden">
+    <div class="mb-4">
+      <h2 class="text-2xl font-black mb-1">Tasks</h2>
+      <p class="text-sm opacity-60">Complete tasks to earn more CTC</p>
+    </div>
+    <div class="mb-5">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-lg">⏰</span>
+        <h3 class="font-bold">Daily Tasks</h3>
+        <span class="text-xs opacity-60 ml-auto" id="dailyReset">Resets in 24h</span>
+      </div>
+      <div id="dailyTasksList" class="space-y-2"></div>
+    </div>
+    <div class="mb-5">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-lg">🌐</span>
+        <h3 class="font-bold">Social Tasks</h3>
+      </div>
+      <div id="socialTasksList" class="space-y-2"></div>
+    </div>
+    <div>
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-lg">⭐</span>
+        <h3 class="font-bold">Special Tasks</h3>
+      </div>
+      <div id="specialTasksList" class="space-y-2"></div>
+    </div>
+  </section>
 
-function tick(){
-  if (!S) return;
-  localRegen();
-  $('energy-fill').style.width = Math.max(0, Math.min(100, S.energy / S.maxEnergy * 100)) + '%';
-  $('energy-text').textContent = `${Math.floor(S.energy)} / ${S.maxEnergy}`;
-  const info = dailyInfo();
-  if (info.claimedToday) $('btn-daily').textContent = '⏳ ' + clock(info.nextClaim - Date.now());
-  document.querySelectorAll('button[data-ready]').forEach(b => {
-    if (Date.now() >= +b.dataset.ready){
-      b.disabled = false; b.textContent = 'Check'; b.removeAttribute('data-ready');
-    } else {
-      b.textContent = `Check ${Math.ceil((+b.dataset.ready - Date.now())/1000)}s`;
-    }
-  });
-}
+  <!-- DAILY BONUS TAB -->
+  <section id="tab-daily" class="tab-content hidden">
+    <div class="mb-4">
+      <h2 class="text-2xl font-black mb-1">Daily Bonus</h2>
+      <p class="text-sm opacity-60">Claim every day for bigger rewards</p>
+    </div>
+    <div class="glass rounded-3xl p-6 mb-4 text-center relative overflow-hidden">
+      <div class="text-6xl mb-2 streak-fire inline-block">🔥</div>
+      <div class="text-sm opacity-60">Current Streak</div>
+      <div class="text-5xl font-black gradient-text my-2" id="streakBig">0</div>
+      <div class="text-sm opacity-60">days</div>
+    </div>
+    <div class="glass rounded-3xl p-5 mb-4">
+      <div class="text-sm font-bold mb-3">7-Day Rewards</div>
+      <div class="grid grid-cols-7 gap-2" id="dailyCalendar"></div>
+      <button id="claimDailyBtn" onclick="claimDailyBonus()" class="w-full mt-4 gradient-btn text-white font-bold py-3 rounded-2xl tap-anim">
+        Claim Daily Bonus
+      </button>
+    </div>
+    <div class="glass rounded-2xl p-4">
+      <div class="text-sm font-bold mb-2">💡 How it works</div>
+      <ul class="text-xs opacity-70 space-y-1.5">
+        <li>• Claim once every 24 hours</li>
+        <li>• Rewards increase with your streak</li>
+        <li>• Day 7 gives a <span class="text-yellow-400 font-bold">MEGA BONUS</span></li>
+        <li>• Missing a day resets your streak</li>
+      </ul>
+    </div>
+  </section>
 
-/* ======================= BOOT ======================= */
-async function boot(){
-  setConn('connecting');
-  if (CONFIG.API_URL.includes('PASTE-YOUR-WORKER-URL') && IS_TG){
-    setConn('offline');
-    toast('⚠️ Owner must set CONFIG.API_URL in index.html!', 'error');
-    return;
-  }
-  const sp = (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param)
-    || new URLSearchParams(location.search).get('ref') || '';
-  try {
-    reconcile(await BE.auth(sp));
-    setConn(IS_TG ? 'online' : 'demo');
-    if (!IS_TG) setTimeout(() => toast('👋 Demo mode — open inside Telegram to sync with the server', 'info'), 600);
-  } catch(e){
-    setConn('offline');
-    toast(e.message === 'unauthorized'
-      ? '⚠️ Server rejected login — check the BOT_TOKEN secret in your Worker'
-      : '⚠️ Cannot reach server — check your Worker deployment', 'error');
-  }
-  if (IS_TG){ $('btn-simref').style.display = 'none'; }   // demo-only buttons
-  updateHUD(); renderTasks(); renderBoost(); renderRefs(); renderBoard();
-  setInterval(tick, 1000);
-  setInterval(pollState, CONFIG.pollMs);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) pollState(); });
-}
-boot();
+  <!-- INVITE TAB -->
+  <section id="tab-invite" class="tab-content hidden">
+    <div class="mb-4">
+      <h2 class="text-2xl font-black mb-1">Invite Friends</h2>
+      <p class="text-sm opacity-60">Earn <span class="text-yellow-400 font-bold">+5 CTC</span> for each friend</p>
+    </div>
+    <div class="grid grid-cols-2 gap-3 mb-4">
+      <div class="glass rounded-2xl p-4 text-center">
+        <div class="text-3xl mb-1">👥</div>
+        <div class="text-2xl font-black" id="inviteCount">0</div>
+        <div class="text-xs opacity-60">Friends Invited</div>
+      </div>
+      <div class="glass rounded-2xl p-4 text-center">
+        <div class="text-3xl mb-1">💰</div>
+        <div class="text-2xl font-black gradient-text" id="inviteEarnings">0</div>
+        <div class="text-xs opacity-60">CTC Earned</div>
+      </div>
+    </div>
+    <div class="glass rounded-3xl p-5 mb-4">
+      <div class="text-sm font-bold mb-3">Your Referral Link</div>
+      <div class="flex gap-2">
+        <div class="flex-1 glass rounded-xl px-3 py-2.5 text-xs truncate" id="referralLink">Loading...</div>
+        <button onclick="copyReferralLink()" class="gradient-btn text-white font-bold px-4 rounded-xl tap-anim text-sm">Copy</button>
+      </div>
+      <button onclick="shareInvite()" class="w-full mt-3 bg-[#229ED9] text-white font-bold py-3 rounded-2xl tap-anim flex items-center justify-center gap-2">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.03-1.97 1.24-5.55 3.66-.53.36-1.01.54-1.43.53-.47-.01-1.38-.27-2.05-.49-.83-.27-1.49-.42-1.43-.88.03-.24.37-.49 1.02-.75 3.99-1.74 6.65-2.89 7.99-3.44 3.8-1.58 4.59-1.86 5.1-1.87.11 0 .37.03.54.17.14.12.18.28.2.45-.01.06.01.24 0 .38z"/></svg>
+        Share with Friends
+      </button>
+    </div>
+    <div class="glass rounded-3xl p-5">
+      <div class="text-sm font-bold mb-3">🎁 Bonus Tiers</div>
+      <div class="space-y-2">
+        <div class="flex items-center justify-between p-3 rounded-xl bg-white/5">
+          <div class="flex items-center gap-3">
+            <div class="text-2xl">🥉</div>
+            <div>
+              <div class="text-sm font-semibold">Invite 3 friends</div>
+              <div class="text-xs opacity-60">Bonus reward</div>
+            </div>
+          </div>
+          <div class="text-sm font-bold gradient-text" id="tier1Status">0/3</div>
+        </div>
+        <div class="flex items-center justify-between p-3 rounded-xl bg-white/5">
+          <div class="flex items-center gap-3">
+            <div class="text-2xl">🥈</div>
+            <div>
+              <div class="text-sm font-semibold">Invite 10 friends</div>
+              <div class="text-xs opacity-60">Premium bonus</div>
+            </div>
+          </div>
+          <div class="text-sm font-bold gradient-text" id="tier2Status">0/10</div>
+        </div>
+        <div class="flex items-center justify-between p-3 rounded-xl bg-white/5">
+          <div class="flex items-center gap-3">
+            <div class="text-2xl">🥇</div>
+            <div>
+              <div class="text-sm font-semibold">Invite 25 friends</div>
+              <div class="text-xs opacity-60">Legendary reward</div>
+            </div>
+          </div>
+          <div class="text-sm font-bold gradient-text" id="tier3Status">0/25</div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-})();
-</script>
-</body>
-</html>
+  <!-- PROFILE TAB -->
+  <section id="tab-profile" class="tab-content hidden">
+    <div class="mb-4">
+      <h2 class="text-2xl font-black mb-1">Profile</h2>
+      <p class="text-sm opacity-60">Your stats and achievements</p>
+    </div>
+    <div class="glass rounded-3xl p-6 mb-4 flex flex-col items-center">
+      <div class="level-ring rounded-full p-1.5 mb-3" id="levelRing" style="--progress: 0%">
+        <div class="w-24 h-24 rounded-full bg-gradient-to-br from-purple-600 to-indigo-800 flex items-center justify-center text-3xl font-black">
+          <span id="profileInitial">P</span>
+        </div>
+      </div>
+      <div class="text-xl font-bold" id="profileName">Player</div>
+      <div class="text-sm opacity-60">Level <span id="profileLevel">1</span> • <span id="profileLevelName">Newbie</span></div>
+    </div>
+    <div class="grid grid-cols-2 gap-3 mb-4">
+      <div class="glass rounded-2xl p-4">
+        <div class="text-xs opacity-60 uppercase tracking-wider">Total Balance</div>
+        <div class="text-2xl font-black gradient-text mt-1" id="statBalance">0</div>
+      </div>
+      <div class="glass rounded-2xl p-4">
+        <div class="text-xs opacity-60 uppercase tracking-wider">Total Earned</div>
+        <div class="text-2xl font-black mt-1" id="statEarned">0</div>
+      </div>
+      <div class="glass rounded-2xl p-4">
+        <div class="text-xs opacity-60 uppercase tracking-wider">Total Taps</div>
+        <div class="text-2xl font-black mt-1" id="statTaps">0</div>
+      </div>
+      <div class="glass rounded-2xl p-4">
+        <div class="text-xs opacity-60 uppercase tracking-wider">Tasks Done</div>
+        <div class="text-2xl font-black mt-1" id="statTasks">0</div>
+      </div>
+    </div>
+    <div class="glass rounded-3xl p-5 mb-4">
+      <
