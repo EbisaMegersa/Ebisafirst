@@ -302,8 +302,12 @@ main{flex:1;min-height:0;display:flex;flex-direction:column}
 
 /* ======================= CONFIG — EDIT THESE! ======================= */
 const CONFIG = {
-  API_URL: 'https://coinrush-api.ebisamagarsaa.workers.dev/',  // TODO: paste your Worker URL here
-  botUsername: 'EbisaNewMiniappBot',              // TODO: your bot username from BotFather
+  // ⚠️ STEP 1: Open your Worker URL in a browser, copy it, paste it below.
+  // It looks like: https://coinrush-api.xxxx.workers.dev  (NO slash at the end!)
+  API_URL: 'https://coinrush-api.ebisamagarsaa.workers.dev/',
+
+  botUsername: 'EbisaNewMiniappBot',   // ✅ your bot — referral links use this
+
   referralReward: 5,
   streakRewards: [15, 25, 40, 60, 90, 130, 200],
   levels: [0, 100, 250, 500, 1000, 2500, 5000, 10000, 25000, 50000],
@@ -655,6 +659,7 @@ async function syncAfter(){ try { reconcile(await BE.state()); } catch(e){} }
 const taskState = id => (S.tasks && S.tasks[id]) || {};
 let taskSig = '';
 function renderTasks(){
+  if (!S) return;
   const sig = JSON.stringify([S.tasks, S.taps, S.refCount, S.streak]);
   if (sig === taskSig) return;
   taskSig = sig;
@@ -768,7 +773,7 @@ function renderBoost(){
 /* ======================= REFERRALS ======================= */
 function refLink(){
   const uid = (S && S.user && S.user.id) || 'demo';
-  return `https://t.me/${CONFIG.botUsername}?startapp=ref_${uid}`;   // startapp = correct param for Mini Apps
+  return `https://t.me/${CONFIG.botUsername}?startapp=ref_${uid}`;
 }
 function renderRefs(){
   if (!S) return;
@@ -923,9 +928,9 @@ function tick(){
 /* ======================= BOOT ======================= */
 async function boot(){
   setConn('connecting');
-  if (CONFIG.API_URL.includes('YOUR-WORKER') && IS_TG){
+  if (CONFIG.API_URL.includes('PASTE-YOUR-WORKER-URL') && IS_TG){
     setConn('offline');
-    toast('⚠️ Set CONFIG.API_URL to your Worker URL first!', 'error');
+    toast('⚠️ Owner must set CONFIG.API_URL in index.html!', 'error');
     return;
   }
   const sp = (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param)
@@ -951,4 +956,4 @@ boot();
 })();
 </script>
 </body>
-  </html>
+                                                                  </html>
