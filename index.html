@@ -1,402 +1,960 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>CoinTap - Backend Connected</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0B0B0D">
+<title>POINTR</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.0/index.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --tg-theme-bg-color: #0f0f1a;
-    --tg-theme-text-color: #ffffff;
-    --tg-theme-hint-color: #8a8a9e;
-    --tg-theme-link-color: #7c5cff;
-    --tg-theme-button-color: #7c5cff;
-    --tg-theme-button-text-color: #ffffff;
-    --tg-theme-secondary-bg-color: #1a1a2e;
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --bg:#0B0B0D; --panel:#141417; --panel2:#1B1B1F; --line:#26262B;
+    --text:#F4F1E8; --muted:#8E8B84; --accent:#F5B93B; --ink:#221A05;
   }
-  * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-  html, body {
-    margin: 0; padding: 0;
-    font-family: 'Inter', system-ui, sans-serif;
-    background: var(--tg-theme-bg-color, #0f0f1a);
-    color: var(--tg-theme-text-color, #fff);
-    overflow-x: hidden;
-    user-select: none;
-    -webkit-user-select: none;
-  }
-  body {
-    background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f0f1a 50%, #000 100%);
-    min-height: 100vh;
-    padding-bottom: 90px;
-  }
-  .glass {
-    background: rgba(255,255,255,0.04);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.08);
-  }
-  .coin-gradient {
-    background: conic-gradient(from 0deg, #fbbf24, #f59e0b, #fcd34d, #fbbf24);
-    box-shadow: 0 0 60px rgba(251, 191, 36, 0.4), inset 0 0 30px rgba(255,255,255,0.2);
-  }
-  .coin-pulse { animation: pulse 2.5s ease-in-out infinite; }
-  @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 60px rgba(251, 191, 36, 0.4), inset 0 0 30px rgba(255,255,255,0.2); transform: scale(1); }
-    50% { box-shadow: 0 0 90px rgba(251, 191, 36, 0.7), inset 0 0 30px rgba(255,255,255,0.3); transform: scale(1.02); }
-  }
-  .tap-anim:active { transform: scale(0.95); }
-  .tap-anim { transition: transform 0.1s ease; }
-  .ripple {
-    position: absolute; border-radius: 50%; background: rgba(251, 191, 36, 0.4);
-    animation: rippleAnim 0.8s ease-out forwards; pointer-events: none;
-  }
-  @keyframes rippleAnim {
-    0% { width: 0; height: 0; opacity: 0.8; }
-    100% { width: 300px; height: 300px; opacity: 0; }
-  }
-  .float-plus {
-    position: absolute; color: #fbbf24; font-weight: 700; font-size: 24px;
-    pointer-events: none; animation: floatUp 1s ease-out forwards;
-    text-shadow: 0 2px 10px rgba(251, 191, 36, 0.6);
-  }
-  @keyframes floatUp {
-    0% { opacity: 1; transform: translateY(0) scale(1); }
-    100% { opacity: 0; transform: translateY(-80px) scale(1.3); }
-  }
-  .tab-active { color: #fbbf24; background: rgba(251, 191, 36, 0.1); }
-  .tab-active svg { stroke: #fbbf24; }
-  .gradient-text {
-    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #fcd34d 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-  }
-  .gradient-btn {
-    background: linear-gradient(135deg, #7c5cff 0%, #5b3fd9 100%);
-    box-shadow: 0 8px 24px rgba(124, 92, 255, 0.4);
-  }
-  .gradient-btn:active { transform: scale(0.97); }
-  .progress-bar {
-    background: linear-gradient(90deg, #7c5cff, #fbbf24);
-    transition: width 0.6s ease;
-  }
-  .slide-in { animation: slideIn 0.3s ease-out; }
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .toast {
-    animation: toastIn 0.3s ease-out, toastOut 0.3s ease-in 2s forwards;
-  }
-  @keyframes toastIn {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes toastOut {
-    to { opacity: 0; transform: translateY(-20px); }
-  }
-  .level-ring {
-    background: conic-gradient(#fbbf24 var(--progress, 0%), rgba(255,255,255,0.1) 0%);
-  }
-  .shine { position: relative; overflow: hidden; }
-  .shine::after {
-    content: ''; position: absolute; top: 0; left: -100%;
-    width: 100%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-    animation: shine 3s infinite;
-  }
-  @keyframes shine {
-    0% { left: -100%; }
-    50%, 100% { left: 100%; }
-  }
-  .streak-fire { animation: flicker 1.5s ease-in-out infinite alternate; }
-  @keyframes flicker {
-    from { transform: scale(1) rotate(-2deg); }
-    to { transform: scale(1.1) rotate(2deg); }
-  }
-  ::-webkit-scrollbar { display: none; }
-  * { scrollbar-width: none; }
-  
-  /* Loading overlay */
-  .loading-overlay {
-    position: fixed; inset: 0; background: rgba(15,15,26,0.9);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 100; backdrop-filter: blur(10px);
-  }
-  .spinner {
-    width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1);
-    border-top-color: #7c5cff; border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  
-  /* Connection status */
-  .status-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    display: inline-block; margin-right: 6px;
-  }
-  .status-online { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
-  .status-offline { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
-  .status-syncing { background: #fbbf24; box-shadow: 0 0 8px #fbbf24; animation: pulse 1s infinite; }
+  html,body{height:100%}
+  body{background:#070709;color:var(--text);font-family:'Space Grotesk',sans-serif;-webkit-font-smoothing:antialiased}
+  button{font-family:inherit}
+  svg{display:block}
+  ::selection{background:rgba(245,185,59,.3)}
+
+  #app{max-width:430px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;background:var(--bg)}
+  @media(min-width:500px){#app{border-left:1px solid var(--line);border-right:1px solid var(--line)}}
+
+  /* ---------- top bar ---------- */
+  #topbar{display:flex;align-items:center;gap:10px;padding:14px 16px;position:sticky;top:0;z-index:50;
+    background:rgba(11,11,13,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+  #ava{width:40px;height:40px;border-radius:50%;overflow:hidden;background:var(--panel2);border:1px solid var(--line);
+    display:grid;place-items:center;color:var(--accent);font-weight:700;flex-shrink:0}
+  #ava img{width:100%;height:100%;object-fit:cover}
+  .uinfo{flex:1;min-width:0}
+  #uname{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #ulvl{font-size:10.5px;color:var(--muted);letter-spacing:.08em;margin-top:2px}
+  .icon-btn{width:38px;height:38px;border-radius:10px;background:var(--panel2);border:1px solid var(--line);
+    display:grid;place-items:center;color:var(--text);cursor:pointer;transition:filter .15s}
+  .icon-btn:hover{filter:brightness(1.25)}
+  .icon-btn:active{transform:scale(.94)}
+  .icon-btn svg{width:17px;height:17px}
+
+  main{flex:1;overflow-y:auto;padding:0 16px calc(96px + env(safe-area-inset-bottom))}
+  .view{display:none;animation:viewIn .25s ease}
+  .view.active{display:block}
+  @keyframes viewIn{from{opacity:0;transform:translateY(6px)}}
+
+  h1{font-size:22px;font-weight:700;letter-spacing:-.02em;margin-top:16px}
+  .sub{color:var(--muted);font-size:13px;margin:5px 0 18px;line-height:1.45}
+  .sub b{color:var(--accent)}
+
+  /* ---------- ticker ---------- */
+  .ticker{overflow:hidden;margin:12px -16px 0;padding:2px 0;
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+    mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+  .ticker-track{display:flex;width:max-content;animation:marquee 26s linear infinite}
+  .tk{font-size:12px;color:var(--muted);white-space:nowrap;padding-right:38px}
+  .tk b{color:var(--text);font-weight:600}
+  .tk::before{content:'';display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--accent);margin-right:8px;vertical-align:2px}
+  @keyframes marquee{to{transform:translateX(-50%)}}
+
+  /* ---------- balance ---------- */
+  .balance{margin-top:18px}
+  .bal-label{display:flex;justify-content:space-between;align-items:center;font-size:11px;letter-spacing:.14em;color:var(--muted);font-weight:600}
+  .brand{color:var(--accent);letter-spacing:.3em;font-size:10px}
+  .bal-num{margin:8px 0 12px;font-size:clamp(44px,14vw,58px);font-weight:700;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+  .bal-num em{font-style:normal;font-size:15px;color:var(--muted);letter-spacing:.1em;margin-left:8px}
+  #balanceNum{display:inline-block}
+  #balanceNum.pop{animation:pop .3s ease}
+  @keyframes pop{50%{transform:scale(1.1)}}
+  .lvlbar{height:5px;background:var(--panel2);border-radius:3px;overflow:hidden}
+  .lvlbar i{display:block;height:100%;background:var(--accent);border-radius:3px;width:0;transition:width .4s ease}
+  .lvl-row{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px;letter-spacing:.05em}
+
+  /* ---------- tap coin ---------- */
+  #orbWrap{width:min(64vw,240px);margin:26px auto 0;position:relative;aspect-ratio:1}
+  #orb{position:absolute;inset:0;border-radius:50%;background:var(--accent);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;
+    cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+    box-shadow:0 18px 40px rgba(0,0,0,.5),inset 0 -8px 0 rgba(0,0,0,.16),inset 0 3px 0 rgba(255,255,255,.28);
+    transition:transform .09s ease,filter .3s}
+  #orb::before{content:'';position:absolute;inset:12px;border-radius:50%;border:2px dashed rgba(34,26,5,.35);animation:spin 40s linear infinite}
+  #orbWrap.turbo #orb::before{animation-duration:2.5s}
+  #orb.pressed{transform:scale(.93)}
+  #orb svg{width:56px;height:56px;color:rgba(34,26,5,.8)}
+  .tap-label{font-size:10px;letter-spacing:.28em;font-weight:700;color:rgba(34,26,5,.55)}
+  #perTap{font-size:13px;font-weight:700;color:rgba(34,26,5,.85);font-variant-numeric:tabular-nums}
+  .ring{position:absolute;inset:0;border-radius:50%;border:2px solid rgba(245,185,59,.55);animation:ringOut .55s ease-out forwards;pointer-events:none}
+  @keyframes ringOut{from{transform:scale(.92);opacity:.9}to{transform:scale(1.32);opacity:0}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  #orbBadge{position:absolute;top:-8px;right:-12px;background:var(--text);color:#111;font-size:10px;font-weight:700;
+    letter-spacing:.06em;padding:5px 10px;border-radius:999px;display:none;z-index:2}
+  #orbWrap.turbo #orbBadge{display:block}
+  #orbLock{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);display:none;align-items:center;gap:6px;
+    background:rgba(20,20,23,.95);border:1px solid var(--line);padding:6px 12px;border-radius:999px;font-size:11px;color:var(--muted);z-index:2;white-space:nowrap}
+  #orbLock svg{width:12px;height:12px}
+  #orbWrap.depleted #orb{filter:grayscale(.75) brightness(.55)}
+  #orbWrap.depleted #orbLock{display:flex}
+
+  /* ---------- energy ---------- */
+  .energy{width:min(64vw,240px);margin:20px auto 0}
+  .energy-head{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px;letter-spacing:.04em}
+  .e-lbl{display:flex;align-items:center;gap:5px}
+  .e-lbl svg{width:12px;height:12px;color:var(--accent)}
+  #energyTxt{font-variant-numeric:tabular-nums}
+  .ebar{height:6px;background:var(--panel2);border-radius:3px;overflow:hidden}
+  .ebar i{display:block;height:100%;background:var(--accent);width:100%;transition:width .2s linear}
+
+  /* ---------- shared pieces ---------- */
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:16px}
+  .pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;border:1px solid var(--line);
+    font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap}
+  .pill.gold{color:var(--accent);border-color:rgba(245,185,59,.35);background:rgba(245,185,59,.08)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:12px;
+    font-weight:600;cursor:pointer;transition:filter .15s,transform .05s}
+  .btn:hover{filter:brightness(1.07)}
+  .btn:active{transform:scale(.97)}
+  .btn:disabled{opacity:.45;cursor:default;pointer-events:none}
+  .btn-accent{background:var(--accent);color:var(--ink)}
+  .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--text)}
+  .btn-sm{height:34px;padding:0 14px;font-size:13px;border-radius:10px}
+  .btn-block{width:100%;height:46px;font-size:15px}
+  .btn svg{width:16px;height:16px}
+  .list-head{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:11.5px;letter-spacing:.1em;
+    text-transform:uppercase;margin:22px 2px 8px;font-weight:600}
+  .list-head svg{width:14px;height:14px;color:var(--accent)}
+  .spin{width:15px;height:15px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:rot .7s linear infinite}
+  @keyframes rot{to{transform:rotate(360deg)}}
+
+  /* task / boost rows */
+  .trow{display:flex;align-items:center;gap:12px;padding:13px 14px}
+  .trow:not(:last-child){border-bottom:1px solid var(--line)}
+  .trow.feat{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:15px;margin-bottom:6px}
+  .chip{width:42px;height:42px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);
+    display:grid;place-items:center;color:var(--accent);flex-shrink:0}
+  .chip svg{width:19px;height:19px}
+  .chip.done{background:var(--accent);border-color:var(--accent);color:var(--ink)}
+  .tinfo{flex:1;min-width:0}
+  .ttitle{font-size:14px;font-weight:600}
+  .ttitle.done{color:var(--muted)}
+  .psub{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:4px;font-size:12px;color:var(--muted)}
+  .pbar{flex:1;max-width:110px;height:4px;background:var(--panel2);border-radius:2px;overflow:hidden}
+  .pbar i{display:block;height:100%;background:var(--accent)}
+  .done-chip{width:32px;height:32px;border-radius:50%;background:var(--accent);display:grid;place-items:center;color:var(--ink);flex-shrink:0}
+  .done-chip svg{width:15px;height:15px}
+  .foot-note{font-size:12px;color:var(--muted);margin-top:14px;line-height:1.5}
+
+  /* daily bonus */
+  .daily{padding:14px;margin-top:22px}
+  .d-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .d-title{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:600}
+  .d-title svg{width:16px;height:16px;color:var(--accent)}
+  .d-chips{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+  .dchip{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0;border-radius:10px;
+    background:var(--panel2);border:1px solid var(--line)}
+  .dchip span{font-size:9px;color:var(--muted);letter-spacing:.05em}
+  .dchip b{font-size:10.5px;font-weight:600}
+  .dchip.done{background:var(--accent);border-color:var(--accent)}
+  .dchip.done span{color:rgba(34,26,5,.6)}
+  .dchip.done b{color:var(--ink)}
+  .dchip.today{border-color:var(--accent);animation:blink 1.6s infinite}
+  @keyframes blink{50%{border-color:rgba(245,185,59,.3)}}
+  .daily .btn-block{margin-top:12px}
+
+  /* friends */
+  .linkbox{display:flex;align-items:center;gap:10px;padding:10px 10px 10px 14px;margin-bottom:10px}
+  #refLink{flex:1;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .stats{display:flex;align-items:stretch;padding:16px;margin-top:14px}
+  .stat{flex:1.2}
+  .stat:last-child{flex:1;display:flex;flex-direction:column;justify-content:center}
+  .stat-num{font-size:32px;font-weight:700;letter-spacing:-.02em;color:var(--accent);font-variant-numeric:tabular-nums;line-height:1.1}
+  .stat:last-child .stat-num{font-size:22px;color:var(--text)}
+  .stat-lbl{font-size:11px;color:var(--muted);margin-top:3px;letter-spacing:.05em}
+  .vdiv{width:1px;background:var(--line);margin:0 18px}
+  #friendList,#boardList{overflow:hidden}
+  .brow{display:flex;align-items:center;gap:10px;padding:11px 12px}
+  .brow:not(:last-child){border-bottom:1px solid var(--line)}
+  .ava{width:36px;height:36px;border-radius:50%;background:var(--panel2);border:1px solid var(--line);
+    display:grid;place-items:center;font-weight:700;color:var(--accent);font-size:14px;flex-shrink:0}
+  .ava.sm{width:30px;height:30px;font-size:12px}
+  .brow.me{background:rgba(245,185,59,.07)}
+  .brow.me .ava{border-color:var(--accent)}
+  .rank{width:22px;text-align:center;color:var(--muted);font-weight:600;font-size:13px;flex-shrink:0}
+  .brow.top .rank svg{width:16px;height:16px;color:var(--accent);margin:0 auto}
+  .bname{font-weight:600;font-size:14px}
+  .finfo{flex:1;min-width:0}
+  .fwhen{font-size:11px;color:var(--muted);margin-top:1px}
+  .bpts{margin-left:auto;font-size:13px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
+  .brow.me .bpts{color:var(--accent)}
+  .bgap{text-align:center;color:var(--muted);padding:4px 0;font-size:14px;letter-spacing:.2em}
+  .brow.me{border-radius:0}
+
+  /* tab bar */
+  #tabbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;display:flex;
+    background:rgba(13,13,15,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+    border-top:1px solid var(--line);padding:7px 8px calc(7px + env(safe-area-inset-bottom));z-index:100}
+  .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;
+    color:var(--muted);font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    padding:6px 0 2px;cursor:pointer;position:relative;transition:color .2s;-webkit-tap-highlight-color:transparent}
+  .nav-btn svg{width:21px;height:21px}
+  .nav-btn.active{color:var(--accent)}
+  .nav-btn.active::before{content:'';position:absolute;top:-8px;width:26px;height:2px;border-radius:2px;background:var(--accent)}
+
+  /* toast / sheet / floating points */
+  #toast{position:fixed;top:16px;left:50%;transform:translate(-50%,-80px);z-index:300;display:flex;gap:8px;align-items:center;
+    background:#1C1C21;border:1px solid var(--line);padding:10px 16px;border-radius:999px;font-size:13px;font-weight:500;
+    transition:transform .3s cubic-bezier(.2,.9,.3,1.2);box-shadow:0 8px 24px rgba(0,0,0,.5);white-space:nowrap}
+  #toast.show{transform:translate(-50%,0)}
+  #toast svg{width:16px;height:16px;color:var(--accent)}
+  #veil{position:fixed;inset:0;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:opacity .25s;z-index:120}
+  #veil.show{opacity:1;pointer-events:auto}
+  #sheet{position:fixed;left:50%;bottom:0;transform:translate(-50%,105%);width:100%;max-width:430px;background:#151518;
+    border:1px solid var(--line);border-bottom:none;border-radius:20px 20px 0 0;z-index:130;
+    transition:transform .3s cubic-bezier(.3,1,.3,1);padding:8px 20px calc(26px + env(safe-area-inset-bottom))}
+  #sheet.open{transform:translate(-50%,0)}
+  .handle{width:40px;height:4px;border-radius:2px;background:var(--line);margin:6px auto 16px}
+  .sh-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  .sh-head h3{font-size:17px;font-weight:700;letter-spacing:-.01em}
+  .sh-row{display:flex;gap:12px;padding:10px 0;align-items:flex-start}
+  .sh-row svg{width:18px;height:18px;color:var(--accent);flex-shrink:0;margin-top:2px}
+  .sh-row b{display:block;font-size:14px;font-weight:600}
+  .sh-row span{display:block;font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.45}
+  .sh-note{font-size:11.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px;margin-top:8px;line-height:1.5}
+  .fx{position:fixed;z-index:300;transform:translate(-50%,-50%);font-weight:700;font-size:15px;color:var(--accent);
+    pointer-events:none;animation:fxUp .8s cubic-bezier(.2,.7,.3,1) forwards;text-shadow:0 2px 10px rgba(0,0,0,.55);font-variant-numeric:tabular-nums}
+  .fx.big{font-size:22px}
+  @keyframes fxUp{to{opacity:0;transform:translate(calc(-50% + var(--dx,0px)),calc(-50% - 84px))}}
 </style>
 </head>
 <body>
+<div id="app">
 
-<!-- Loading Overlay -->
-<div id="loadingOverlay" class="loading-overlay">
-  <div class="text-center">
-    <div class="spinner mx-auto mb-4"></div>
-    <div class="text-sm opacity-60">Connecting to server...</div>
+  <header id="topbar">
+    <div id="ava"></div>
+    <div class="uinfo">
+      <div id="uname">Guest</div>
+      <div id="ulvl">LV 1 · ROOKIE</div>
+    </div>
+    <button id="infoBtn" class="icon-btn" aria-label="About"><i data-lucide="info"></i></button>
+  </header>
+
+  <main>
+    <!-- ============ HOME / EARN ============ -->
+    <section id="view-home" class="view active">
+      <div class="ticker"><div class="ticker-track" id="tickerTrack"></div></div>
+
+      <div class="balance">
+        <div class="bal-label"><span>YOUR BALANCE</span><span class="brand">POINTR</span></div>
+        <div class="bal-num"><span id="balanceNum">0</span><em>PTS</em></div>
+        <div class="lvlbar"><i id="lvlFill"></i></div>
+        <div class="lvl-row"><span id="lvlCur">LV 1 · ROOKIE</span><span id="lvlNext"></span></div>
+      </div>
+
+      <div id="orbWrap">
+        <div id="orbBadge">×3 TURBO</div>
+        <div id="orbLock"><i data-lucide="lock"></i>Recharging…</div>
+        <div id="orb">
+          <i data-lucide="star"></i>
+          <span class="tap-label">TAP TO EARN</span>
+          <span id="perTap">+1 / tap</span>
+        </div>
+      </div>
+
+      <div class="energy">
+        <div class="energy-head">
+          <span class="e-lbl"><i data-lucide="zap"></i>Energy</span>
+          <span id="energyTxt">500 / 500</span>
+        </div>
+        <div class="ebar"><i id="energyFill"></i></div>
+      </div>
+
+      <div class="panel daily">
+        <div class="d-head">
+          <span class="d-title"><i data-lucide="flame"></i>Daily bonus</span>
+          <span class="pill" id="dailyStreak">Streak: 0 days</span>
+        </div>
+        <div class="d-chips" id="dailyChips"></div>
+        <button class="btn btn-accent btn-block" id="dailyBtn"></button>
+      </div>
+    </section>
+
+    <!-- ============ TASKS ============ -->
+    <section id="view-tasks" class="view">
+      <h1>Tasks</h1>
+      <p class="sub">One-time quests. Complete them and claim your reward.</p>
+      <div id="taskFeatured"></div>
+      <div class="list-head">All tasks</div>
+      <div class="panel" id="taskList"></div>
+    </section>
+
+    <!-- ============ FRIENDS ============ -->
+    <section id="view-friends" class="view">
+      <h1>Invite friends</h1>
+      <p class="sub">Earn <b>+5 points</b> for every friend who joins through your link.</p>
+
+      <div class="linkbox panel">
+        <span id="refLink"></span>
+        <button id="copyBtn" class="icon-btn" aria-label="Copy link"><i data-lucide="copy"></i></button>
+      </div>
+      <button class="btn btn-accent btn-block" id="shareBtn"><i data-lucide="share-2"></i>Share invite link</button>
+
+      <div class="panel stats">
+        <div class="stat">
+          <div class="stat-num" id="frCount">0</div>
+          <div class="stat-lbl">FRIENDS INVITED</div>
+        </div>
+        <div class="vdiv"></div>
+        <div class="stat">
+          <div class="stat-num" id="frEarned">0</div>
+          <div class="stat-lbl">POINTS FROM INVITES</div>
+        </div>
+      </div>
+
+      <div class="list-head">Your friends</div>
+      <div class="panel" id="friendList"></div>
+
+      <div class="list-head"><i data-lucide="crown"></i>Weekly leaderboard</div>
+      <div class="panel" id="boardList"></div>
+    </section>
+
+    <!-- ============ BOOST ============ -->
+    <section id="view-boost" class="view">
+      <h1>Boosters</h1>
+      <p class="sub">Spend points to level up your earning rate.</p>
+      <div class="panel" id="boostList"></div>
+      <p class="foot-note">Upgrades are permanent. Turbo and energy refill recharge automatically over time.</p>
+    </section>
+  </main>
+
+  <nav id="tabbar">
+    <button class="nav-btn active" data-tab="home"><i data-lucide="coins"></i><span>Earn</span></button>
+    <button class="nav-btn" data-tab="tasks"><i data-lucide="list-checks"></i><span>Tasks</span></button>
+    <button class="nav-btn" data-tab="friends"><i data-lucide="users"></i><span>Friends</span></button>
+    <button class="nav-btn" data-tab="boost"><i data-lucide="rocket"></i><span>Boost</span></button>
+  </nav>
+
+  <div id="toast"></div>
+  <div id="veil"></div>
+  <div id="sheet">
+    <div class="handle"></div>
+    <div class="sh-head">
+      <h3>How POINTR works</h3>
+      <button id="sheetClose" class="icon-btn" aria-label="Close"><i data-lucide="x"></i></button>
+    </div>
+    <div class="sh-row"><i data-lucide="coins"></i><div><b>Tap to earn</b><span>Each tap costs 1 energy. Energy recharges over time, so pace yourself or boost your tank.</span></div></div>
+    <div class="sh-row"><i data-lucide="gift"></i><div><b>Daily bonus</b><span>Come back every day — the reward grows with your streak up to day 7.</span></div></div>
+    <div class="sh-row"><i data-lucide="users"></i><div><b>Invite friends</b><span>+5 points for every friend who joins with your personal link.</span></div></div>
+    <div class="sh-row"><i data-lucide="rocket"></i><div><b>Boost</b><span>Spend points on multi-tap and energy upgrades to earn faster permanently.</span></div></div>
+    <p class="sh-note">Frontend preview — progress is stored on this device for now. The backend will sync it to your account.</p>
   </div>
 </div>
 
-<!-- Toast container -->
-<div id="toastContainer" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2"></div>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+/* ============================================================
+   POINTR — Telegram Mini App (frontend preview)
+   Backend hooks are marked with [BACKEND] comments.
+   ============================================================ */
 
-<!-- Header -->
-<header class="sticky top-0 z-40 glass px-4 py-3 flex items-center justify-between">
-  <div class="flex items-center gap-2">
-    <div class="w-9 h-9 rounded-full coin-gradient flex items-center justify-center font-bold text-black">C</div>
-    <div>
-      <div class="text-xs opacity-60 flex items-center">
-        <span id="connectionStatus" class="status-dot status-offline"></span>
-        <span id="statusText">Offline</span>
-      </div>
-      <div class="text-sm font-semibold" id="userName">Player</div>
-    </div>
-  </div>
-  <div class="flex items-center gap-2">
-    <div class="glass rounded-full px-3 py-1.5 flex items-center gap-1.5">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M8 12h8"/></svg>
-      <span class="text-sm font-bold" id="headerBalance">0</span>
-    </div>
-    <button onclick="showSettings()" class="w-9 h-9 rounded-full glass flex items-center justify-center tap-anim">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    </button>
-  </div>
-</header>
+// ---- Config: change these when you create the real bot ----
+const BOT_USERNAME  = 'YourBotBot';              // [BACKEND] your bot's username
+const CHANNEL_URL   = 'https://t.me/telegram';   // [BACKEND] your real channel
 
-<!-- Main content -->
-<main id="mainContent" class="px-4 pt-4">
-  <!-- HOME TAB -->
-  <section id="tab-home" class="tab-content">
-    <div class="glass rounded-3xl p-5 mb-4 shine">
-      <div class="flex items-center justify-between mb-3">
-        <div>
-          <div class="text-xs opacity-60 uppercase tracking-wider">Your Balance</div>
-          <div class="flex items-baseline gap-2 mt-1">
-            <span class="text-4xl font-black gradient-text" id="balanceDisplay">0</span>
-            <span class="text-lg opacity-60">CTC</span>
-          </div>
-        </div>
-        <div class="text-right">
-          <div class="text-xs opacity-60">Level <span id="levelDisplay">1</span></div>
-          <div class="text-sm font-semibold" id="levelName">Newbie</div>
-        </div>
-      </div>
-      <div class="h-1.5 rounded-full bg-white/10 overflow-hidden">
-        <div id="levelProgress" class="h-full progress-bar" style="width: 0%"></div>
-      </div>
-      <div class="flex justify-between text-xs opacity-60 mt-1.5">
-        <span id="currentLevelPts">0</span>
-        <span id="nextLevelPts">1,000</span>
-      </div>
-    </div>
+// ---- Telegram bootstrap (all guarded so it also runs in a plain browser) ----
+const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+try {
+  tg.ready(); tg.expand();
+  tg.setHeaderColor && tg.setHeaderColor('#0B0B0D');
+  tg.setBackgroundColor && tg.setBackgroundColor('#0B0B0D');
+  tg.disableVerticalSwipes && tg.disableVerticalSwipes();
+  tg.MainButton && tg.MainButton.setParams({ color:'#F5B93B', text_color:'#221A05' });
+} catch(e) {}
 
-    <div class="glass rounded-3xl p-6 mb-4 flex flex-col items-center relative overflow-hidden">
-      <div class="text-xs opacity-60 uppercase tracking-wider mb-2">Tap to Earn</div>
-      <div class="text-sm mb-4">+<span id="tapReward">1</span> per tap</div>
-      <div id="coinContainer" class="relative cursor-pointer" style="width: 220px; height: 220px;">
-        <div id="coin" class="w-full h-full rounded-full coin-gradient coin-pulse flex items-center justify-center tap-anim">
-          <div class="w-[85%] h-[85%] rounded-full bg-gradient-to-br from-yellow-300 to-yellow-600 flex items-center justify-center shadow-inner">
-            <div class="text-6xl font-black text-yellow-900" style="text-shadow: 0 2px 4px rgba(0,0,0,0.2);">C</div>
-          </div>
-        </div>
-      </div>
-      <div class="mt-4 text-xs opacity-60">Energy: <span id="energyDisplay">1000</span> / 1000</div>
-      <div class="w-full h-1.5 rounded-full bg-white/10 overflow-hidden mt-1.5">
-        <div id="energyBar" class="h-full progress-bar" style="width: 100%"></div>
-      </div>
-    </div>
+function haptic(kind, style){
+  try{
+    if(!tg || !tg.HapticFeedback) return;
+    if(kind==='impact')  tg.HapticFeedback.impactOccurred(style||'light');
+    if(kind==='notify')  tg.HapticFeedback.notificationOccurred(style||'success');
+    if(kind==='select')  tg.HapticFeedback.selectionChanged();
+  }catch(e){}
+}
+const userId = () => (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) || 1234567;
 
-    <div class="grid grid-cols-3 gap-3 mb-4">
-      <div class="glass rounded-2xl p-3 text-center">
-        <div class="text-2xl mb-1">🔥</div>
-        <div class="text-lg font-bold" id="streakDisplay">0</div>
-        <div class="text-xs opacity-60">Day Streak</div>
-      </div>
-      <div class="glass rounded-2xl p-3 text-center">
-        <div class="text-2xl mb-1">👥</div>
-        <div class="text-lg font-bold" id="invitesDisplay">0</div>
-        <div class="text-xs opacity-60">Invites</div>
-      </div>
-      <div class="glass rounded-2xl p-3 text-center">
-        <div class="text-2xl mb-1">⚡</div>
-        <div class="text-lg font-bold" id="tapsDisplay">0</div>
-        <div class="text-xs opacity-60">Total Taps</div>
-      </div>
-    </div>
-  </section>
+// ---- Constants ----
+const KEY = 'pointr_v1';
+const DAILY_REWARDS = [50, 100, 150, 200, 300, 500, 1000];
+const TURBO_MS  = 30 * 1000;   // turbo lasts 30 s
+const TURBO_CD  = 10 * 60 * 1000;
+const REFILL_CD = 5 * 60 * 1000;
+const REGEN_MS  = 3000;        // +1 energy every 3 s
+const LEVELS = [[0,'ROOKIE'],[1000,'BRONZE'],[5000,'SILVER'],[15000,'GOLD'],[40000,'PLATINUM'],[100000,'DIAMOND']];
 
-  <!-- TASKS TAB -->
-  <section id="tab-tasks" class="tab-content hidden">
-    <div class="mb-4">
-      <h2 class="text-2xl font-black mb-1">Tasks</h2>
-      <p class="text-sm opacity-60">Complete tasks to earn more CTC</p>
-    </div>
-    <div class="mb-5">
-      <div class="flex items-center gap-2 mb-3">
-        <span class="text-lg">⏰</span>
-        <h3 class="font-bold">Daily Tasks</h3>
-        <span class="text-xs opacity-60 ml-auto" id="dailyReset">Resets in 24h</span>
-      </div>
-      <div id="dailyTasksList" class="space-y-2"></div>
-    </div>
-    <div class="mb-5">
-      <div class="flex items-center gap-2 mb-3">
-        <span class="text-lg">🌐</span>
-        <h3 class="font-bold">Social Tasks</h3>
-      </div>
-      <div id="socialTasksList" class="space-y-2"></div>
-    </div>
-    <div>
-      <div class="flex items-center gap-2 mb-3">
-        <span class="text-lg">⭐</span>
-        <h3 class="font-bold">Special Tasks</h3>
-      </div>
-      <div id="specialTasksList" class="space-y-2"></div>
-    </div>
-  </section>
+// ---- State ----
+function defState(){
+  return { v:1, updatedAt:0, balance:0, total:0, taps:0,
+    energy:500, lastEnergy:Date.now(),
+    multitap:1, tank:1,
+    turboUntil:0, turboLast:0, refillLast:0,
+    dailyLast:0, streak:0,
+    invited:2, tasks:{}, flags:{} };
+}
+let state = defState();
 
-  <!-- DAILY BONUS TAB -->
-  <section id="tab-daily" class="tab-content hidden">
-    <div class="mb-4">
-      <h2 class="text-2xl font-black mb-1">Daily Bonus</h2>
-      <p class="text-sm opacity-60">Claim every day for bigger rewards</p>
-    </div>
-    <div class="glass rounded-3xl p-6 mb-4 text-center relative overflow-hidden">
-      <div class="text-6xl mb-2 streak-fire inline-block">🔥</div>
-      <div class="text-sm opacity-60">Current Streak</div>
-      <div class="text-5xl font-black gradient-text my-2" id="streakBig">0</div>
-      <div class="text-sm opacity-60">days</div>
-    </div>
-    <div class="glass rounded-3xl p-5 mb-4">
-      <div class="text-sm font-bold mb-3">7-Day Rewards</div>
-      <div class="grid grid-cols-7 gap-2" id="dailyCalendar"></div>
-      <button id="claimDailyBtn" onclick="claimDailyBonus()" class="w-full mt-4 gradient-btn text-white font-bold py-3 rounded-2xl tap-anim">
-        Claim Daily Bonus
-      </button>
-    </div>
-    <div class="glass rounded-2xl p-4">
-      <div class="text-sm font-bold mb-2">💡 How it works</div>
-      <ul class="text-xs opacity-70 space-y-1.5">
-        <li>• Claim once every 24 hours</li>
-        <li>• Rewards increase with your streak</li>
-        <li>• Day 7 gives a <span class="text-yellow-400 font-bold">MEGA BONUS</span></li>
-        <li>• Missing a day resets your streak</li>
-      </ul>
-    </div>
-  </section>
+function save(){
+  state.updatedAt = Date.now();
+  try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){}
+  try{ tg && tg.CloudStorage && tg.CloudStorage.setItem(KEY, JSON.stringify(state), ()=>{}); }catch(e){} // [BACKEND] will be replaced by account sync
+}
+let saveT = null;
+function saveSoon(){ if(!saveT) saveT = setTimeout(()=>{ saveT=null; save(); }, 2000); }
 
-  <!-- INVITE TAB -->
-  <section id="tab-invite" class="tab-content hidden">
-    <div class="mb-4">
-      <h2 class="text-2xl font-black mb-1">Invite Friends</h2>
-      <p class="text-sm opacity-60">Earn <span class="text-yellow-400 font-bold">+5 CTC</span> for each friend</p>
-    </div>
-    <div class="grid grid-cols-2 gap-3 mb-4">
-      <div class="glass rounded-2xl p-4 text-center">
-        <div class="text-3xl mb-1">👥</div>
-        <div class="text-2xl font-black" id="inviteCount">0</div>
-        <div class="text-xs opacity-60">Friends Invited</div>
-      </div>
-      <div class="glass rounded-2xl p-4 text-center">
-        <div class="text-3xl mb-1">💰</div>
-        <div class="text-2xl font-black gradient-text" id="inviteEarnings">0</div>
-        <div class="text-xs opacity-60">CTC Earned</div>
-      </div>
-    </div>
-    <div class="glass rounded-3xl p-5 mb-4">
-      <div class="text-sm font-bold mb-3">Your Referral Link</div>
-      <div class="flex gap-2">
-        <div class="flex-1 glass rounded-xl px-3 py-2.5 text-xs truncate" id="referralLink">Loading...</div>
-        <button onclick="copyReferralLink()" class="gradient-btn text-white font-bold px-4 rounded-xl tap-anim text-sm">Copy</button>
-      </div>
-      <button onclick="shareInvite()" class="w-full mt-3 bg-[#229ED9] text-white font-bold py-3 rounded-2xl tap-anim flex items-center justify-center gap-2">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.03-1.97 1.24-5.55 3.66-.53.36-1.01.54-1.43.53-.47-.01-1.38-.27-2.05-.49-.83-.27-1.49-.42-1.43-.88.03-.24.37-.49 1.02-.75 3.99-1.74 6.65-2.89 7.99-3.44 3.8-1.58 4.59-1.86 5.1-1.87.11 0 .37.03.54.17.14.12.18.28.2.45-.01.06.01.24 0 .38z"/></svg>
-        Share with Friends
-      </button>
-    </div>
-    <div class="glass rounded-3xl p-5">
-      <div class="text-sm font-bold mb-3">🎁 Bonus Tiers</div>
-      <div class="space-y-2">
-        <div class="flex items-center justify-between p-3 rounded-xl bg-white/5">
-          <div class="flex items-center gap-3">
-            <div class="text-2xl">🥉</div>
-            <div>
-              <div class="text-sm font-semibold">Invite 3 friends</div>
-              <div class="text-xs opacity-60">Bonus reward</div>
-            </div>
-          </div>
-          <div class="text-sm font-bold gradient-text" id="tier1Status">0/3</div>
-        </div>
-        <div class="flex items-center justify-between p-3 rounded-xl bg-white/5">
-          <div class="flex items-center gap-3">
-            <div class="text-2xl">🥈</div>
-            <div>
-              <div class="text-sm font-semibold">Invite 10 friends</div>
-              <div class="text-xs opacity-60">Premium bonus</div>
-            </div>
-          </div>
-          <div class="text-sm font-bold gradient-text" id="tier2Status">0/10</div>
-        </div>
-        <div class="flex items-center justify-between p-3 rounded-xl bg-white/5">
-          <div class="flex items-center gap-3">
-            <div class="text-2xl">🥇</div>
-            <div>
-              <div class="text-sm font-semibold">Invite 25 friends</div>
-              <div class="text-xs opacity-60">Legendary reward</div>
-            </div>
-          </div>
-          <div class="text-sm font-bold gradient-text" id="tier3Status">0/25</div>
-        </div>
-      </div>
-    </div>
-  </section>
+function load(){
+  let raw = null;
+  try{ raw = localStorage.getItem(KEY); }catch(e){}
+  if(raw){
+    try{ state = Object.assign(defState(), JSON.parse(raw)); }catch(e){ state = defState(); }
+  } else {
+    // no local copy — try Telegram CloudStorage (works across the user's devices)
+    try{
+      tg && tg.CloudStorage && tg.CloudStorage.getItem(KEY, (err, val)=>{
+        if(!err && val){
+          try{
+            const s = Object.assign(defState(), JSON.parse(val));
+            if(s.updatedAt > state.updatedAt){ state = s; regenStep(); renderAll(); }
+          }catch(e){}
+        }
+      });
+    }catch(e){}
+  }
+}
 
-  <!-- PROFILE TAB -->
-  <section id="tab-profile" class="tab-content hidden">
-    <div class="mb-4">
-      <h2 class="text-2xl font-black mb-1">Profile</h2>
-      <p class="text-sm opacity-60">Your stats and achievements</p>
-    </div>
-    <div class="glass rounded-3xl p-6 mb-4 flex flex-col items-center">
-      <div class="level-ring rounded-full p-1.5 mb-3" id="levelRing" style="--progress: 0%">
-        <div class="w-24 h-24 rounded-full bg-gradient-to-br from-purple-600 to-indigo-800 flex items-center justify-center text-3xl font-black">
-          <span id="profileInitial">P</span>
-        </div>
-      </div>
-      <div class="text-xl font-bold" id="profileName">Player</div>
-      <div class="text-sm opacity-60">Level <span id="profileLevel">1</span> • <span id="profileLevelName">Newbie</span></div>
-    </div>
-    <div class="grid grid-cols-2 gap-3 mb-4">
-      <div class="glass rounded-2xl p-4">
-        <div class="text-xs opacity-60 uppercase tracking-wider">Total Balance</div>
-        <div class="text-2xl font-black gradient-text mt-1" id="statBalance">0</div>
-      </div>
-      <div class="glass rounded-2xl p-4">
-        <div class="text-xs opacity-60 uppercase tracking-wider">Total Earned</div>
-        <div class="text-2xl font-black mt-1" id="statEarned">0</div>
-      </div>
-      <div class="glass rounded-2xl p-4">
-        <div class="text-xs opacity-60 uppercase tracking-wider">Total Taps</div>
-        <div class="text-2xl font-black mt-1" id="statTaps">0</div>
-      </div>
-      <div class="glass rounded-2xl p-4">
-        <div class="text-xs opacity-60 uppercase tracking-wider">Tasks Done</div>
-        <div class="text-2xl font-black mt-1" id="statTasks">0</div>
-      </div>
-    </div>
-    <div class="glass rounded-3xl p-5 mb-4">
-      <
+// ---- Helpers ----
+const $ = id => document.getElementById(id);
+function icons(){ window.lucide && lucide.createIcons(); }
+function fmt(n){
+  n = Math.floor(n);
+  if(n >= 1e6) return (n/1e6).toFixed(1).replace(/\.0$/,'') + 'M';
+  if(n >= 1e4) return (n/1e3).toFixed(1).replace(/\.0$/,'') + 'K';
+  return n.toLocaleString('en-US');
+}
+const fmtFull = n => n >= 1e7 ? fmt(n) : n.toLocaleString('en-US');
+function fmtMS(ms){ const s=Math.max(0,Math.ceil(ms/1000)); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
+function fmtHMS(ms){
+  ms = Math.max(0, ms); const s = Math.floor(ms/1000);
+  return Math.floor(s/3600)+':'+String(Math.floor(s%3600/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+}
+
+// ---- Toast ----
+let toastTimer;
+function toast(msg, icon){
+  const t = $('toast');
+  t.innerHTML = '<i data-lucide="'+(icon||'check')+'"></i><span>'+msg+'</span>';
+  icons();
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2400);
+}
+
+// ---- Floating "+N" points ----
+let fxCount = 0;
+function floatText(text, x, y, big){
+  if(fxCount > 36) return;
+  fxCount++;
+  const el = document.createElement('div');
+  el.className = 'fx' + (big ? ' big' : '');
+  el.textContent = text;
+  el.style.left = x+'px'; el.style.top = y+'px';
+  el.style.setProperty('--dx', (Math.random()*44-22)+'px');
+  document.body.appendChild(el);
+  setTimeout(()=>{ el.remove(); fxCount--; }, 850);
+}
+
+// ---- Derived values ----
+const energyMax   = () => 500 + (state.tank-1)*250;
+const turboActive = () => Date.now() < state.turboUntil;
+const perTap      = () => state.multitap * (turboActive() ? 3 : 1);
+const mtCost      = () => 1000 * Math.pow(2, state.multitap-1);
+const tkCost      = () => 1500 * Math.pow(2, state.tank-1);
+const refLink     = () => 'https://t.me/'+BOT_USERNAME+'?start=ref'+userId();
+
+function lvl(){
+  let i = 0;
+  for(let k=0;k<LEVELS.length;k++) if(state.total >= LEVELS[k][0]) i = k;
+  const cur = LEVELS[i][0], next = LEVELS[i+1] ? LEVELS[i+1][0] : null;
+  return { i, name:LEVELS[i][1],
+    prog: next ? (state.total-cur)/(next-cur) : 1,
+    need: next ? next-state.total : 0,
+    nextName: next ? LEVELS[i+1][1] : null };
+}
+
+// ---- Daily bonus logic ----
+const lastWasYesterday = () => !!state.dailyLast &&
+  new Date(state.dailyLast).toDateString() === new Date(Date.now()-864e5).toDateString();
+const dailyAvailable = () => !state.dailyLast ||
+  new Date().toDateString() !== new Date(state.dailyLast).toDateString();
+function nextDayIndex(){
+  if(!state.dailyLast) return 1;
+  return lastWasYesterday() ? (state.streak % 7) + 1 : 1;
+}
+const nextMidnight = () => { const d = new Date(); d.setHours(24,0,0,0); return d.getTime(); };
+
+// ---- Energy regen ----
+function regenStep(){
+  const max = energyMax(), now = Date.now();
+  if(state.energy >= max){ state.lastEnergy = now; return; }
+  const gained = Math.floor((now - state.lastEnergy) / REGEN_MS);
+  if(gained > 0){
+    state.energy = Math.min(max, state.energy + gained);
+    state.lastEnergy = Math.min(now, state.lastEnergy + gained*REGEN_MS);
+    if(state.energy >= max) state.lastEnergy = now;
+    energyUI();
+  }
+}
+
+// ============================================================
+//  RENDERING
+// ============================================================
+function renderTop(){
+  const u = tg && tg.initDataUnsafe ? tg.initDataUnsafe.user : null;
+  const name = [u && u.first_name, u && u.last_name].filter(Boolean).join(' ') || 'Guest';
+  $('uname').textContent = name;
+  $('ava').innerHTML = (u && u.photo_url)
+    ? '<img src="'+u.photo_url+'" alt="">'
+    : '<span>'+(name[0]||'P').toUpperCase()+'</span>';
+}
+
+function renderBalance(){
+  const l = lvl();
+  $('balanceNum').textContent = fmtFull(state.balance);
+  $('lvlFill').style.width = (l.prog*100).toFixed(1)+'%';
+  $('lvlCur').textContent  = 'LV '+(l.i+1)+' · '+l.name;
+  $('lvlNext').textContent = l.need ? fmt(l.need)+' PTS → '+l.nextName : 'MAX LEVEL';
+  $('ulvl').textContent    = 'LV '+(l.i+1)+' · '+l.name;
+}
+
+function addPoints(n, x, y){
+  state.balance += n; state.total += n;
+  renderBalance();
+  const b = $('balanceNum');
+  b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop');
+  if(x != null) floatText('+'+n, x, y);
+  save();
+}
+
+function energyUI(){
+  const max = energyMax();
+  $('energyFill').style.width = Math.min(100, state.energy/max*100)+'%';
+  $('energyTxt').textContent  = Math.floor(state.energy)+' / '+fmt(max);
+  $('orbWrap').classList.toggle('depleted', state.energy < 1);
+}
+
+function perTapUI(){ $('perTap').textContent = '+'+perTap()+' / tap'; }
+
+// ---- Ticker ----
+const TICKS = [
+  ['Mina','claimed a daily bonus'], ['Arjun','invited a friend'], ['Sofia','completed a task'],
+  ['Dmitri','reached Gold level'], ['Lena','earned 500 from taps'], ['Omar','activated Turbo ×3'],
+];
+function renderTicker(){
+  const half = TICKS.map(t=>'<span class="tk"><b>'+t[0]+'</b> '+t[1]+'</span>').join('');
+  $('tickerTrack').innerHTML = half + half;
+}
+
+// ---- Orb visuals ----
+function pulse(){
+  if($('orbWrap').querySelectorAll('.ring').length > 14) return;
+  const s = document.createElement('span');
+  s.className = 'ring';
+  $('orbWrap').appendChild(s);
+  setTimeout(()=>s.remove(), 600);
+}
+let pressT;
+function press(){
+  const o = $('orb');
+  o.classList.add('pressed');
+  clearTimeout(pressT);
+  pressT = setTimeout(()=>o.classList.remove('pressed'), 90);
+}
+
+// ---- Tasks ----
+const TASKS = [
+  { id:'channel', icon:'send',  title:'Join our Telegram channel', sub:'Open the channel, then verify', reward:500, type:'link', url:CHANNEL_URL },
+  { id:'x',       icon:'globe', title:'Follow us on X',            sub:'Follow, then verify',           reward:250, type:'link', url:'https://x.com/' },
+  { id:'tap100',  icon:'mouse-pointer-click', title:'Make 100 taps', sub:'Progress counts as you tap',  reward:200, type:'count', target:100, get:()=>state.taps },
+  { id:'invite3', icon:'users', title:'Invite 3 friends',          sub:'+5 points per friend',          reward:750, type:'count', target:3,   get:()=>state.invited },
+];
+const conditionMet = t => t.type==='count' && t.get() >= t.target;
+
+function taskRow(t, feat){
+  const st   = state.tasks[t.id] || 'start';
+  const done = st === 'done';
+  const pill = '<span class="pill gold">+'+fmt(t.reward)+' PTS</span>';
+  let mid;
+  if(t.type==='count' && !done){
+    const v = Math.min(t.get(), t.target);
+    mid = '<div class="psub">'+pill+
+          '<div class="pbar"><i style="width:'+(v/t.target*100)+'%"></i></div><span>'+fmt(v)+'/'+fmt(t.target)+'</span></div>';
+  } else {
+    mid = '<div class="psub">'+pill+'<span>'+(t.sub||'')+'</span></div>';
+  }
+  let ctrl;
+  if(done){
+    ctrl = '<span class="done-chip"><i data-lucide="check"></i></span>';
+  } else if(t.type==='link'){
+    ctrl = '<button class="btn btn-sm btn-accent" data-task="'+t.id+'">'+(st==='start'?'Start':'Verify')+'</button>';
+  } else if(conditionMet(t)){
+    ctrl = '<button class="btn btn-sm btn-accent" data-task="'+t.id+'">Claim</button>';
+  } else ctrl = '';
+
+  return '<div class="trow'+(feat?' feat':'')+'">'+
+    '<div class="chip'+(done?' done':'')+'"><i data-lucide="'+(done?'check':t.icon)+'"></i></div>'+
+    '<div class="tinfo"><div class="ttitle'+(done?' done':'')+'">'+t.title+'</div>'+mid+'</div>'+
+    (ctrl ? '<div>'+ctrl+'</div>' : '')+
+  '</div>';
+}
+function renderTasks(){
+  $('taskFeatured').innerHTML = taskRow(TASKS[0], true);
+  $('taskList').innerHTML = TASKS.slice(1).map(t=>taskRow(t)).join('');
+  icons();
+}
+function awardTask(t, rect){
+  state.tasks[t.id] = 'done';
+  addPoints(t.reward);
+  if(rect) floatText('+'+fmt(t.reward), rect.left+rect.width/2, rect.top, true);
+  toast(t.title+' · +'+fmt(t.reward), 'check');
+  haptic('notify','success');
+  renderTasks(); save();
+}
+// notify once when a count-task becomes claimable
+function checkAuto(){
+  for(const t of TASKS){
+    if(t.type!=='count' || state.tasks[t.id]==='done') continue;
+    if(conditionMet(t) && !state.flags['r_'+t.id]){
+      state.flags['r_'+t.id] = 1;
+      toast('Task ready to claim: '+t.title, 'list-checks');
+    }
+  }
+}
+
+// ---- Daily UI ----
+function renderDaily(){
+  const avail    = dailyAvailable();
+  const day      = nextDayIndex();
+  const claimed  = avail ? (lastWasYesterday() ? (state.streak>=7 ? 0 : state.streak) : 0) : state.streak;
+  const todayIdx = avail ? claimed : claimed - 1;
+
+  $('dailyStreak').textContent = 'Streak: '+state.streak+' day'+(state.streak===1?'':'s');
+  $('dailyChips').innerHTML = DAILY_REWARDS.map((r,i)=>
+    '<div class="dchip'+(i<claimed?' done':i===todayIdx?' today':'')+'"><span>D'+(i+1)+'</span><b>+'+fmt(r)+'</b></div>'
+  ).join('');
+
+  const btn = $('dailyBtn');
+  if(avail){
+    btn.disabled = false;
+    btn.className = 'btn btn-accent btn-block';
+    btn.innerHTML = '<i data-lucide="gift"></i>Claim +'+fmt(DAILY_REWARDS[day-1])+' PTS';
+  } else {
+    btn.disabled = true;
+    btn.className = 'btn btn-ghost btn-block';
+    btn.textContent = 'Next bonus in '+fmtHMS(nextMidnight()-Date.now());
+  }
+  icons();
+}
+
+function claimDaily(){
+  if(!dailyAvailable()) return;
+  const day    = nextDayIndex();
+  const reward = DAILY_REWARDS[day-1];
+  state.streak = day;
+  state.dailyLast = Date.now();
+  const r = $('dailyBtn').getBoundingClientRect();
+  addPoints(reward, r.left+r.width/2, r.top);
+  toast('Daily bonus claimed +'+fmt(reward), 'gift');
+  haptic('notify','success');
+  renderDaily(); checkAuto(); refreshMain(); save();
+}
+
+// ---- Friends ----
+const BOARD = [
+  { n:'CryptoWhale', p:48210 }, { n:'Mina', p:31540 }, { n:'Arjun', p:22890 },
+  { n:'Dmitri', p:15400 }, { n:'Sofia', p:9120 },
+];
+function renderFriends(){
+  $('refLink').textContent = refLink();
+  $('frCount').textContent  = state.invited;
+  $('frEarned').textContent = fmt(state.invited * 5);   // +5 per invite
+
+  const pool = ['Alex K.','Mina P.','Josh R.','Dana W.','Omar S.','Lena T.'];
+  const when = ['2 days ago','5 days ago','1 week ago','2 weeks ago','3 weeks ago','1 month ago'];
+  const rows = [];
+  for(let i=0;i<Math.min(state.invited, pool.length);i++){
+    rows.push('<div class="brow"><span class="ava">'+pool[i][0]+'</span>'+
+      '<div class="finfo"><div class="bname">'+pool[i]+'</div><div class="fwhen">joined '+when[i]+'</div></div>'+
+      '<span class="pill gold">+5 PTS</span></div>');
+  }
+  if(!rows.length) rows.push('<div class="brow"><span class="fwhen">No friends yet — share your link above.</span></div>');
+  $('friendList').innerHTML = rows.join('');
+
+  const data = BOARD.concat([{ n:'You', p:state.total, me:true }]).sort((a,b)=>b.p-a.p);
+  const myIdx = data.findIndex(d=>d.me);
+  let shown = data.slice(0,5);
+  if(myIdx >= 5) shown = data.slice(0,4).concat([{gap:true}, data[myIdx]]);
+  $('boardList').innerHTML = shown.map(d=>{
+    if(d.gap) return '<div class="bgap">···</div>';
+    const rank = data.indexOf(d)+1;
+    return '<div class="brow'+(d.me?' me':'')+(rank===1?' top':'')+'">'+
+      '<span class="rank">'+(rank===1?'<i data-lucide="crown"></i>':rank)+'</span>'+
+      '<span class="ava sm">'+(d.me?'Y':d.n[0])+'</span>'+
+      '<span class="bname">'+d.n+'</span>'+
+      '<span class="bpts">'+fmt(d.p)+' PTS</span></div>';
+  }).join('');
+  icons();
+}
+
+// ---- Boost ----
+const BOOSTS = [
+  { key:'multitap', icon:'mouse-pointer-click', name:'Multi-tap',
+    info:()=> 'Level '+state.multitap+' · +'+state.multitap+' pts per tap',
+    btn(){ return { t:'Upgrade · '+fmt(mtCost()), dis: state.balance < mtCost() }; },
+    act:()=>upgrade('multitap') },
+  { key:'tank', icon:'battery-charging', name:'Energy limit',
+    info:()=> 'Level '+state.tank+' · '+fmt(energyMax())+' max energy',
+    btn(){ return { t:'Upgrade · '+fmt(tkCost()), dis: state.balance < tkCost() }; },
+    act:()=>upgrade('tank') },
+  { key:'turbo', icon:'zap', name:'Turbo ×3',
+    info:()=> 'Triple points per tap for 30 seconds',
+    btn(){
+      if(turboActive()) return { t:'Active · '+Math.ceil((state.turboUntil-Date.now())/1000)+'s', dis:true };
+      const cd = TURBO_CD - (Date.now()-state.turboLast);
+      if(state.turboLast && cd > 0) return { t:'Recharge '+fmtMS(cd), dis:true };
+      return { t:'Activate', dis:false };
+    },
+    act:activateTurbo },
+  { key:'refill', icon:'battery-full', name:'Full energy',
+    info:()=> 'Instantly refill your energy tank',
+    btn(){
+      if(state.energy >= energyMax()) return { t:'Full', dis:true };
+      const cd = REFILL_CD - (Date.now()-state.refillLast);
+      if(state.refillLast && cd > 0) return { t:'Recharge '+fmtMS(cd), dis:true };
+      return { t:'Refill', dis:false };
+    },
+    act:doRefill },
+];
+function renderBoost(){
+  $('boostList').innerHTML = BOOSTS.map(b=>
+    '<div class="trow"><div class="chip"><i data-lucide="'+b.icon+'"></i></div>'+
+    '<div class="tinfo"><div class="ttitle">'+b.name+'</div><div class="psub" id="bi-'+b.key+'">'+b.info()+'</div></div>'+
+    '<button class="btn btn-sm btn-accent" data-bkey="'+b.key+'" id="bb-'+b.key+'"></button></div>'
+  ).join('');
+  updateBoost(); icons();
+}
+function updateBoost(){
+  for(const b of BOOSTS){
+    const s = b.btn();
+    const el = $('bb-'+b.key);
+    el.textContent = s.t;
+    el.disabled = s.dis;
+    el.className = 'btn btn-sm '+(s.dis ? 'btn-ghost' : 'btn-accent');
+    $('bi-'+b.key).textContent = b.info();
+  }
+}
+function upgrade(kind){
+  const cost = kind==='multitap' ? mtCost() : tkCost();
+  if(state.balance < cost){ toast('Not enough points','coins'); haptic('notify','error'); return; }
+  state.balance -= cost;   // spending doesn't count toward lifetime total
+  state[kind]++;
+  if(kind==='tank') state.energy = Math.min(state.energy, energyMax());
+  renderBalance(); energyUI(); perTapUI(); updateBoost();
+  toast(kind==='multitap'
+    ? 'Multi-tap upgraded to level '+state.multitap
+    : 'Energy limit upgraded to '+fmt(energyMax()), 'rocket');
+  haptic('notify','success');
+  save();
+}
+function activateTurbo(){
+  if(turboActive()) return;
+  state.turboUntil = Date.now() + TURBO_MS;
+  state.turboLast  = Date.now();
+  $('orbWrap').classList.add('turbo');
+  perTapUI(); updateBoost();
+  toast('Turbo ×3 activated for 30 s','zap');
+  haptic('notify','success');
+  save();
+}
+function doRefill(){
+  if(state.energy >= energyMax()) return;
+  state.energy = energyMax();
+  state.refillLast = state.lastEnergy = Date.now();
+  energyUI(); updateBoost();
+  toast('Energy fully refilled','battery-charging');
+  haptic('notify','success');
+  save();
+}
+
+// ============================================================
+//  NAVIGATION / MAIN BUTTON / SHEET
+// ============================================================
+let activeTab = 'home';
+function go(tab){
+  activeTab = tab;
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active', v.id==='view-'+tab));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  haptic('select');
+  if(tab==='tasks')   renderTasks();
+  if(tab==='friends') renderFriends();
+  if(tab==='boost')   updateBoost();
+  refreshMain();
+}
+
+// Telegram Main Button shows the daily claim when it's available
+let mainBtnFn = null;
+function setMainBtn(label, fn){
+  if(!tg || !tg.MainButton) return;
+  try{
+    if(mainBtnFn) tg.MainButton.offClick(mainBtnFn);
+    mainBtnFn = fn;
+    tg.MainButton.setText(label);
+    tg.MainButton.onClick(fn);
+    tg.MainButton.show();
+  }catch(e){}
+}
+function hideMainBtn(){
+  if(!tg || !tg.MainButton) return;
+  try{
+    if(mainBtnFn){ tg.MainButton.offClick(mainBtnFn); mainBtnFn = null; }
+    tg.MainButton.hide();
+  }catch(e){}
+}
+function refreshMain(){
+  if(activeTab==='home' && dailyAvailable())
+    setMainBtn('Claim daily bonus · +'+fmt(DAILY_REWARDS[nextDayIndex()-1])+' PTS', claimDaily);
+  else hideMainBtn();
+}
+
+// Bottom sheet (About) with native Back Button support
+function openSheet(){
+  $('sheet').classList.add('open'); $('veil').classList.add('show');
+  try{ tg && tg.BackButton && (tg.BackButton.show(), tg.BackButton.onClick(closeSheet)); }catch(e){}
+}
+function closeSheet(){
+  $('sheet').classList.remove('open'); $('veil').classList.remove('show');
+  try{ tg && tg.BackButton && (tg.BackButton.offClick(closeSheet), tg.BackButton.hide()); }catch(e){}
+}
+
+// ============================================================
+//  EVENTS
+// ============================================================
+// Tap coin
+ $('orb').addEventListener('pointerdown', e=>{
+  e.preventDefault();
+  if(state.energy < 1){ toast('Out of energy — it recharges over time','battery-charging'); haptic('notify','error'); return; }
+  const gain = perTap();
+  state.energy--;
+  state.taps++;
+  addPoints(gain, e.clientX, e.clientY);
+  pulse(); press();
+  haptic('impact', gain > 1 ? 'medium' : 'light');
+  energyUI(); checkAuto(); saveSoon();
+});
+ $('orb').addEventListener('contextmenu', e=>e.preventDefault());
+
+// Tasks (event delegation — rows get re-rendered freely)
+ $('view-tasks').addEventListener('click', e=>{
+  const b = e.target.closest('[data-task]');
+  if(!b || b.disabled) return;
+  const t  = TASKS.find(x=>x.id===b.dataset.task);
+  const st = state.tasks[t.id] || 'start';
+  if(t.type==='link'){
+    if(st==='start'){
+      state.tasks[t.id] = 'going'; save();
+      try{ tg && tg.openLink ? tg.openLink(t.url) : window.open(t.url,'_blank'); }
+      catch(_){ window.open(t.url,'_blank'); }
+      renderTasks();
+    } else if(st==='going'){
+      b.disabled = true;
+      b.innerHTML = '<span class="spin"></span>';
+      setTimeout(()=>awardTask(t, b.getBoundingClientRect()), 1100); // [BACKEND] real verification goes here
+    }
+  } else if(conditionMet(t)){
+    awardTask(t, b.getBoundingClientRect());
+  }
+});
+
+// Boost (delegated)
+ $('boostList').addEventListener('click', e=>{
+  const b = e.target.closest('[data-bkey]');
+  if(!b || b.disabled) return;
+  const entry = BOOSTS.find(x=>x.key===b.dataset.bkey);
+  entry.act();
+});
+
+// Tabs
+document.querySelectorAll('.nav-btn').forEach(b=> b.addEventListener('click', ()=>go(b.dataset.tab)));
+
+// Daily / invite / sheet
+ $('dailyBtn').addEventListener('click', claimDaily);
+ $('copyBtn').addEventListener('click', async ()=>{
+  const link = refLink();
+  try{ await navigator.clipboard.writeText(link); }
+  catch(e){
+    const ta = document.createElement('textarea');
+    ta.value = link; document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); }catch(_){}
+    ta.remove();
+  }
+  toast('Invite link copied','copy'); haptic('notify','success');
+});
+ $('shareBtn').addEventListener('click', ()=>{
+  const u = 'https://t.me/share/url?url='+encodeURIComponent(refLink())+
+            '&text='+encodeURIComponent('Join me on POINTR and earn points together!');
+  try{ tg && tg.openTelegramLink ? tg.openTelegramLink(u) : window.open(u,'_blank'); }
+  catch(_){ window.open(u,'_blank'); }
+});
+ $('infoBtn').addEventListener('click', openSheet);
+ $('sheetClose').addEventListener('click', closeSheet);
+ $('veil').addEventListener('click', closeSheet);
+
+// Persist when the mini app goes to background
+document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden){ if(saveT){ clearTimeout(saveT); saveT=null; } save(); }
+});
+
+// ============================================================
+//  1-SECOND TICK
+// ============================================================
+let prevAvail = false;
+function tick(){
+  regenStep();
+  // turbo expiry
+  if(!turboActive() && $('orbWrap').classList.contains('turbo')){
+    $('orbWrap').classList.remove('turbo');
+    perTapUI();
+    if(activeTab==='boost') updateBoost();
+  }
+  if(activeTab==='boost') updateBoost();
+  // daily availability may flip at midnight
+  const avail = dailyAvailable();
+  if(avail !== prevAvail){ prevAvail = avail; renderDaily(); refreshMain(); }
+  if(activeTab==='home' && !avail)
+    $('dailyBtn').textContent = 'Next bonus in '+fmtHMS(nextMidnight()-Date.now());
+}
+
+// ============================================================
+//  INIT
+// ============================================================
+function renderAll(){
+  renderTop(); renderBalance(); perTapUI(); energyUI();
+  renderDaily(); renderTasks(); renderFriends();
+}
+load();
+prevAvail = dailyAvailable();
+regenStep();
+renderTicker();
+renderBoost();
+renderAll();
+go('home');
+icons();
+setInterval(tick, 1000);
+</script>
+</body>
+</html>
