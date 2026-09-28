@@ -347,20 +347,23 @@
     <div class="sh-row"><i data-lucide="gift"></i><div><b>Daily bonus</b><span>Come back every day — the reward grows with your streak up to day 7.</span></div></div>
     <div class="sh-row"><i data-lucide="users"></i><div><b>Invite friends</b><span>+5 points for every friend who opens the app through your personal link — counted live on the server.</span></div></div>
     <div class="sh-row"><i data-lucide="rocket"></i><div><b>Boost</b><span>Spend points on multi-tap and energy upgrades to earn faster permanently.</span></div></div>
-    <p class="sh-note">Your progress is stored on this device. Referral counts are verified and stored on the server, so nobody can fake them.</p>
+    <p class="sh-note">Your progress is stored per Telegram account. Referral counts are verified and stored on the server, so nobody can fake them.</p>
   </div>
 </div>
 
 <script src="https://unpkg.com/lucide@latest"></script>
 <script>
 /* ============================================================
-   POINTR — Telegram Mini App
+   POINTR — Telegram Mini App (full integrated build)
+   - Live referral system (Cloudflare Worker backend)
+   - Per-account save slots (each Telegram account = own data)
    ============================================================ */
 
 // ---- CONFIG ------------------------------------------------
 const BOT_USERNAME = 'EbisaNewMiniappBot';
-// Paste your Cloudflare Worker URL here after deploying (step below).
-// Leave '' to run in demo mode (no server needed).
+// >>> Paste your Cloudflare Worker URL here after deploying it, e.g.
+// const API_URL = 'https://pointr-api.your-subdomain.workers.dev';
+// Leave '' to run in demo mode (app still fully works, sample data shown).
 const API_URL = '';
 const POINTS_PER_FRIEND = 5;
 const CHANNEL_URL = 'https://t.me/telegram'; // TODO: your real channel
@@ -396,7 +399,15 @@ const REFILL_CD = 5 * 60 * 1000;
 const REGEN_MS  = 3000;
 const LEVELS = [[0,'ROOKIE'],[1000,'BRONZE'],[5000,'SILVER'],[15000,'GOLD'],[40000,'PLATINUM'],[100000,'DIAMOND']];
 
-// ---- State ----
+// ---- State — one save slot per Telegram account ----
+// Telegram's in-app browser SHARES localStorage between accounts on the same
+// device, so the old single-key save made every account see the same balance.
+// Now each account gets its own slot: pointr_v1_<telegramUserID>.
+function userKey(){
+  const id = userId();
+  return KEY + (id ? '_' + id : '_guest');   // guests (normal browser) get their own slot too
+}
+
 function defState(){
   return { v:1, updatedAt:0, balance:0, total:0, taps:0,
     energy:500, lastEnergy:Date.now(), multitap:1, tank:1,
@@ -407,28 +418,45 @@ let state = defState();
 let saveT = null;
 function save(){
   state.updatedAt = Date.now();
-  try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){}
+  try{ localStorage.setItem(userKey(), JSON.stringify(state)); }catch(e){}
+  // Telegram CloudStorage is already scoped per account, so plain KEY is safe there
   try{ tg && tg.CloudStorage && tg.CloudStorage.setItem(KEY, JSON.stringify(state), ()=>{}); }catch(e){}
 }
 function saveSoon(){ if(!saveT) saveT = setTimeout(()=>{ saveT=null; save(); }, 2000); }
 function flushSave(){ if(saveT){ clearTimeout(saveT); saveT=null; } save(); }
 function load(){
   let raw = null;
-  try{ raw = localStorage.getItem(KEY); }catch(e){}
-  if(raw){
-    try{ state = Object.assign(defState(), JSON.parse(raw)); }catch(e){ state = defState(); }
-  } else if(tg && tg.CloudStorage){
-    try{ // first launch on this device — pull progress from Telegram cloud (cross-device)
-      tg.CloudStorage.getItem(KEY, (err, val)=>{
-        if(!err && val){
-          try{
-            const s = Object.assign(defState(), JSON.parse(val));
-            if(s.updatedAt > state.updatedAt){ state = s; renderAll(); energyUI(); }
-          }catch(e){}
-        }
-      });
+  try{ raw = localStorage.getItem(userKey()); }catch(e){}
+
+  // One-time migration: the FIRST account that opens the updated app on this
+  // device inherits the old shared save; the old slot is then removed so every
+  // other account starts fresh at 0.
+  // (Delete this whole if-block if you want ALL accounts to start from zero.)
+  if(!raw){
+    try{
+      raw = localStorage.getItem(KEY);
+      if(raw){
+        try{ localStorage.setItem(userKey(), raw); }catch(e){}
+        try{ localStorage.removeItem(KEY); }catch(e){}
+      }
     }catch(e){}
   }
+
+  if(raw){
+    try{ state = Object.assign(defState(), JSON.parse(raw)); }catch(e){ state = defState(); }
+  }
+  // Background check: if THIS account has a newer save in Telegram's cloud
+  // (e.g. played on another phone), prefer it. Cloud saves are per-account,
+  // so accounts never see each other's cloud data.
+  try{
+    tg && tg.CloudStorage && tg.CloudStorage.getItem(KEY, (err, val)=>{
+      if(err || !val) return;
+      try{
+        const s = Object.assign(defState(), JSON.parse(val));
+        if(s.updatedAt > state.updatedAt){ state = s; renderAll(); updateBoostUI(); }
+      }catch(e){}
+    });
+  }catch(e){}
 }
 
 // ---- Helpers ----
@@ -480,7 +508,7 @@ const turboActive = () => Date.now() < state.turboUntil;
 const perTap      = () => state.multitap * (turboActive() ? 3 : 1);
 const tapCost     = () => 1000 * Math.pow(2, state.multitap-1);
 const tankCost    = () => 1500 * Math.pow(2, state.tank-1);
-// startapp (not start) — that's how deep links pass a parameter straight into a Mini App
+// startapp (not start) — that's how deep links pass a parameter into a Mini App
 const refLink     = () => 'https://t.me/'+BOT_USERNAME+'?startapp=ref'+userId();
 
 function lvl(){
@@ -617,7 +645,7 @@ function renderFriends(){
       '<div class="finfo"><div class="bname">'+f.n+'</div><div class="fwhen">joined '+f.w+'</div></div>'+
       '<span class="pill">+5 PTS</span></div>'
     ).join('') +
-    '<div class="brow empty"><span class="fwhen">Sample data — connect the API (setup below the code) for live counting.</span></div>';
+    '<div class="brow empty"><span class="fwhen">Sample data — connect the API (API_URL) for live counting.</span></div>';
   }
   icons();
 }
