@@ -39,6 +39,20 @@
   .icon-btn:active{transform:scale(.94)}
   .icon-btn svg{width:17px;height:17px}
 
+  /* ---------- server status chip ---------- */
+  .net-chip{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 11px;border-radius:999px;
+    background:var(--panel2);border:1px solid var(--line);cursor:pointer;flex-shrink:0;
+    font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--muted);transition:filter .15s}
+  .net-chip:active{transform:scale(.95)}
+  .net-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);transition:background .3s}
+  .net-chip.online{color:#6FCE87;border-color:rgba(90,200,120,.35)}
+  .net-chip.online .net-dot{background:#4CC66B}
+  .net-chip.offline{color:#E8837A;border-color:rgba(230,120,110,.35)}
+  .net-chip.offline .net-dot{background:#E86358}
+  .net-chip.demo{color:var(--accent);border-color:rgba(245,185,59,.35)}
+  .net-chip.demo .net-dot{background:var(--accent)}
+  .net-chip.checking .net-dot{background:var(--accent);animation:blink 1s infinite}
+
   main{flex:1;overflow-y:auto;padding:0 16px calc(96px + env(safe-area-inset-bottom))}
   .view{display:none;animation:viewIn .25s ease}
   .view.active{display:block}
@@ -123,7 +137,6 @@
   .list-head{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:11.5px;letter-spacing:.1em;
     text-transform:uppercase;margin:22px 2px 8px;font-weight:600}
   .list-head svg{width:14px;height:14px;color:var(--accent)}
-  .list-head .pill{margin-left:auto;text-transform:none;letter-spacing:0}
   .spin{width:15px;height:15px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:rot .7s linear infinite}
   @keyframes rot{to{transform:rotate(360deg)}}
 
@@ -202,7 +215,7 @@
   .nav-btn.active{color:var(--accent)}
   .nav-btn.active::before{content:'';position:absolute;top:-8px;width:26px;height:2px;border-radius:2px;background:var(--accent)}
 
-  /* ---------- toast / sheet / fx ---------- */
+  /* ---------- toast / sheets / fx ---------- */
   #toast{position:fixed;top:16px;left:50%;transform:translate(-50%,-80px);z-index:300;display:flex;gap:8px;align-items:center;
     background:#1C1C21;border:1px solid var(--line);padding:10px 16px;border-radius:999px;font-size:13px;font-weight:500;
     transition:transform .3s cubic-bezier(.2,.9,.3,1.2);box-shadow:0 8px 24px rgba(0,0,0,.5);white-space:nowrap;max-width:92vw;overflow:hidden}
@@ -210,17 +223,17 @@
   #toast svg{width:16px;height:16px;color:var(--accent);flex-shrink:0}
   #veil{position:fixed;inset:0;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:opacity .25s;z-index:120}
   #veil.show{opacity:1;pointer-events:auto}
-  #sheet{position:fixed;left:50%;bottom:0;transform:translate(-50%,105%);width:100%;max-width:430px;background:#151518;
+  .sheet{position:fixed;left:50%;bottom:0;transform:translate(-50%,105%);width:100%;max-width:430px;background:#151518;
     border:1px solid var(--line);border-bottom:none;border-radius:20px 20px 0 0;z-index:130;
     transition:transform .3s cubic-bezier(.3,1,.3,1);padding:8px 20px calc(26px + env(safe-area-inset-bottom))}
-  #sheet.open{transform:translate(-50%,0)}
+  .sheet.open{transform:translate(-50%,0)}
   .handle{width:40px;height:4px;border-radius:2px;background:var(--line);margin:6px auto 16px}
   .sh-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
   .sh-head h3{font-size:17px;font-weight:700;letter-spacing:-.01em}
   .sh-row{display:flex;gap:12px;padding:10px 0;align-items:flex-start}
   .sh-row svg{width:18px;height:18px;color:var(--accent);flex-shrink:0;margin-top:2px}
   .sh-row b{display:block;font-size:14px;font-weight:600}
-  .sh-row span{display:block;font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.45}
+  .sh-row span{display:block;font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.45;word-break:break-all}
   .sh-note{font-size:11.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px;margin-top:8px;line-height:1.5}
   .fx{position:fixed;z-index:300;transform:translate(-50%,-50%);font-weight:700;font-size:15px;color:var(--accent);
     pointer-events:none;animation:fxUp .8s cubic-bezier(.2,.7,.3,1) forwards;text-shadow:0 2px 10px rgba(0,0,0,.55);font-variant-numeric:tabular-nums}
@@ -237,6 +250,9 @@
       <div id="ulvl">LV 1 · ROOKIE</div>
     </div>
     <div class="topbar-spacer"></div>
+    <button id="netChip" class="net-chip checking" aria-label="Server status">
+      <span class="net-dot"></span><span id="netLabel">…</span>
+    </button>
     <button id="infoBtn" class="icon-btn" aria-label="About"><i data-lucide="info"></i></button>
   </header>
 
@@ -312,7 +328,7 @@
         </div>
       </div>
 
-      <div class="list-head">Your friends <span class="pill" id="netMode"></span></div>
+      <div class="list-head">Your friends</div>
       <div class="panel" id="friendList"></div>
 
       <div class="list-head"><i data-lucide="crown"></i>Invite leaderboard</div>
@@ -337,7 +353,9 @@
 
   <div id="toast"></div>
   <div id="veil"></div>
-  <div id="sheet">
+
+  <!-- About sheet -->
+  <div id="aboutsheet" class="sheet">
     <div class="handle"></div>
     <div class="sh-head">
       <h3>How POINTR works</h3>
@@ -349,6 +367,23 @@
     <div class="sh-row"><i data-lucide="rocket"></i><div><b>Boost</b><span>Spend points on multi-tap and energy upgrades to earn faster permanently.</span></div></div>
     <p class="sh-note">Your progress is stored per Telegram account. Referral counts are verified and stored on the server, so nobody can fake them.</p>
   </div>
+
+  <!-- Server status sheet (tap the chip in the top bar) -->
+  <div id="netsheet" class="sheet">
+    <div class="handle"></div>
+    <div class="sh-head">
+      <h3>Server status</h3>
+      <button id="netClose" class="icon-btn" aria-label="Close"><i data-lucide="x"></i></button>
+    </div>
+    <div class="sh-row"><i data-lucide="server"></i><div><b>API URL</b><span id="nsUrl">—</span></div></div>
+    <div class="sh-row"><i data-lucide="wifi"></i><div><b>Reachable</b><span id="nsReach">—</span></div></div>
+    <div class="sh-row"><i data-lucide="message-square"></i><div><b>Server response</b><span id="nsMsg">—</span></div></div>
+    <div class="sh-row"><i data-lucide="user"></i><div><b>Telegram login</b><span id="nsLogin">—</span></div></div>
+    <div class="sh-row"><i data-lucide="hash"></i><div><b>Your Telegram ID</b><span id="nsId">—</span></div></div>
+    <div class="sh-row"><i data-lucide="clock"></i><div><b>Last successful sync</b><span id="nsSync">—</span></div></div>
+    <button class="btn btn-accent btn-block" id="nsCheck"><i data-lucide="refresh-cw"></i>Check again</button>
+    <p class="sh-note" id="nsHint"></p>
+  </div>
 </div>
 
 <script src="https://unpkg.com/lucide@latest"></script>
@@ -357,13 +392,14 @@
    POINTR — Telegram Mini App (full integrated build)
    - Live referral system (Cloudflare Worker backend)
    - Per-account save slots (each Telegram account = own data)
+   - Server status chip in the top bar + diagnostics panel
    ============================================================ */
 
 // ---- CONFIG ------------------------------------------------
 const BOT_USERNAME = 'EbisaNewMiniappBot';
-// >>> Paste your Cloudflare Worker URL here after deploying it, e.g.
+// >>> Paste your Cloudflare Worker URL here, e.g.
 // const API_URL = 'https://pointr-api.your-subdomain.workers.dev';
-// Leave '' to run in demo mode (app still fully works, sample data shown).
+// Leave '' to run in demo mode (app works, chip shows DEMO).
 const API_URL = '';
 const POINTS_PER_FRIEND = 5;
 const CHANNEL_URL = 'https://t.me/telegram'; // TODO: your real channel
@@ -400,14 +436,10 @@ const REGEN_MS  = 3000;
 const LEVELS = [[0,'ROOKIE'],[1000,'BRONZE'],[5000,'SILVER'],[15000,'GOLD'],[40000,'PLATINUM'],[100000,'DIAMOND']];
 
 // ---- State — one save slot per Telegram account ----
-// Telegram's in-app browser SHARES localStorage between accounts on the same
-// device, so the old single-key save made every account see the same balance.
-// Now each account gets its own slot: pointr_v1_<telegramUserID>.
 function userKey(){
   const id = userId();
-  return KEY + (id ? '_' + id : '_guest');   // guests (normal browser) get their own slot too
+  return KEY + (id ? '_' + id : '_guest');
 }
-
 function defState(){
   return { v:1, updatedAt:0, balance:0, total:0, taps:0,
     energy:500, lastEnergy:Date.now(), multitap:1, tank:1,
@@ -419,7 +451,6 @@ let saveT = null;
 function save(){
   state.updatedAt = Date.now();
   try{ localStorage.setItem(userKey(), JSON.stringify(state)); }catch(e){}
-  // Telegram CloudStorage is already scoped per account, so plain KEY is safe there
   try{ tg && tg.CloudStorage && tg.CloudStorage.setItem(KEY, JSON.stringify(state), ()=>{}); }catch(e){}
 }
 function saveSoon(){ if(!saveT) saveT = setTimeout(()=>{ saveT=null; save(); }, 2000); }
@@ -428,9 +459,7 @@ function load(){
   let raw = null;
   try{ raw = localStorage.getItem(userKey()); }catch(e){}
 
-  // One-time migration: the FIRST account that opens the updated app on this
-  // device inherits the old shared save; the old slot is then removed so every
-  // other account starts fresh at 0.
+  // One-time migration from the old shared save slot.
   // (Delete this whole if-block if you want ALL accounts to start from zero.)
   if(!raw){
     try{
@@ -445,9 +474,7 @@ function load(){
   if(raw){
     try{ state = Object.assign(defState(), JSON.parse(raw)); }catch(e){ state = defState(); }
   }
-  // Background check: if THIS account has a newer save in Telegram's cloud
-  // (e.g. played on another phone), prefer it. Cloud saves are per-account,
-  // so accounts never see each other's cloud data.
+  // Prefer a newer per-account cloud save (e.g. played on another phone)
   try{
     tg && tg.CloudStorage && tg.CloudStorage.getItem(KEY, (err, val)=>{
       if(err || !val) return;
@@ -508,7 +535,6 @@ const turboActive = () => Date.now() < state.turboUntil;
 const perTap      = () => state.multitap * (turboActive() ? 3 : 1);
 const tapCost     = () => 1000 * Math.pow(2, state.multitap-1);
 const tankCost    = () => 1500 * Math.pow(2, state.tank-1);
-// startapp (not start) — that's how deep links pass a parameter into a Mini App
 const refLink     = () => 'https://t.me/'+BOT_USERNAME+'?startapp=ref'+userId();
 
 function lvl(){
@@ -542,21 +568,81 @@ function regenStep(){
 }
 
 // ============================================================
+//  SERVER STATUS — chip in the top bar + diagnostics sheet
+// ============================================================
+let netState = API_URL ? 'checking' : 'demo';  // demo | checking | online | offline
+let lastSyncOk = 0;                            // timestamp of last successful sync
+let lastNetMsg = '';                           // raw message/error from the server
+
+function setNet(s, msg){
+  netState = s;
+  if(msg !== undefined) lastNetMsg = msg;
+  const chip = $('netChip');
+  chip.className = 'net-chip ' + s;
+  $('netLabel').textContent =
+    s==='online'   ? 'ONLINE'  :
+    s==='offline'  ? 'OFFLINE' :
+    s==='demo'     ? 'DEMO'    : '…';
+}
+
+// Lightweight reachability check — hits the public /api/top endpoint (no auth needed)
+async function pingServer(){
+  if(!API_URL){ setNet('demo','No API URL configured'); return false; }
+  setNet('checking');
+  try{
+    const r = await fetch(API_URL + '/api/top', { method:'GET' });
+    const d = await r.json();
+    if(d && d.ok){ setNet('online', 'OK — server and database are working'); return true; }
+    setNet('offline', (d && d.error) ? d.error : 'Unexpected response');
+    return false;
+  }catch(e){
+    setNet('offline', 'Could not reach the server (network error or wrong URL)');
+    return false;
+  }
+}
+
+function netHint(){
+  const m = (lastNetMsg || '').toLowerCase();
+  if(netState === 'demo')
+    return 'No server configured. Deploy the Cloudflare Worker, then paste its URL into API_URL at the top of this file.';
+  if(netState === 'checking')
+    return 'Checking the connection…';
+  if(netState === 'offline'){
+    if(m.includes('bot_token'))
+      return 'The Worker is reachable, but the bot token is missing. Cloudflare → Worker → Settings → Variables and Secrets → add BOT_TOKEN (Secret), then Deploy.';
+    if(m.includes('kv'))
+      return 'The Worker is reachable, but the database is not linked. Cloudflare → Worker → Settings → Bindings → add KV Namespace with variable name exactly KV, then Deploy.';
+    return 'Cannot reach the server. Check that API_URL matches your Worker URL exactly (https://…, no slash at the end) and that the Worker is deployed.';
+  }
+  if(netState === 'online')
+    return (tg && tg.initData)
+      ? 'Connected and verified. Referral counting is live.'
+      : 'Server is fine, but you opened the app in a normal browser. Open it inside Telegram for referrals to count.';
+  return '';
+}
+function fillNetSheet(){
+  $('nsUrl').textContent   = API_URL || 'Not set — demo mode';
+  $('nsReach').textContent =
+    netState==='online'  ? 'Yes' :
+    netState==='offline' ? 'No'  :
+    netState==='demo'    ? '—'   : 'Checking…';
+  $('nsMsg').textContent   = lastNetMsg || '—';
+  $('nsLogin').textContent = (tg && tg.initData) ? 'Yes (Telegram)' : 'No — open the app inside Telegram';
+  $('nsId').textContent    = userId() ? String(userId()) : '— (not in Telegram)';
+  $('nsSync').textContent  = lastSyncOk ? fmtAgo(lastSyncOk) : 'Never';
+  $('nsHint').textContent  = netHint();
+}
+
+// ============================================================
 //  REFERRALS — live sync with the Worker
 // ============================================================
 let lastSync = 0;
-function setNetMode(txt, live){
-  const el = $('netMode'); if(!el) return;
-  el.textContent = txt;
-  el.className = 'pill' + (live ? ' gold' : '');
-}
-
 async function syncReferrals(force){
   if(!API_URL) return;
   if(!force && Date.now() - lastSync < 30000) return;
   lastSync = Date.now();
   const initData = tg ? tg.initData : '';
-  if(!initData){ setNetMode('Open in Telegram'); return; } // running in a plain browser
+  if(!initData) return; // plain browser — chip already reports what's needed
   try{
     const startParam = (tg.initDataUnsafe && tg.initDataUnsafe.start_param) || '';
     const r = await fetch(API_URL + '/api/sync', {
@@ -566,7 +652,8 @@ async function syncReferrals(force){
     });
     const d = await r.json();
     if(!d.ok) throw new Error(d.error || 'sync failed');
-    setNetMode('Live', true);
+    setNet('online','OK — signed in and syncing');
+    lastSyncOk = Date.now();
 
     if(d.freshJoin) toast('Welcome! Invited by ' + (d.referrerName || 'a friend'), 'user-plus');
 
@@ -574,7 +661,7 @@ async function syncReferrals(force){
     state.friends = d.friends || [];
     renderFriends(); checkAuto();
 
-    // claim +5 for friends who joined since the last reward payout
+    // claim +5 for friends who joined since the last payout
     if(d.invited > d.paid){
       const rr = await fetch(API_URL + '/api/reward', {
         method: 'POST',
@@ -591,7 +678,7 @@ async function syncReferrals(force){
     }
     save();
   }catch(e){
-    setNetMode('Offline');
+    setNet('offline', e && e.message ? e.message : 'Sync failed');
   }
 }
 
@@ -645,7 +732,7 @@ function renderFriends(){
       '<div class="finfo"><div class="bname">'+f.n+'</div><div class="fwhen">joined '+f.w+'</div></div>'+
       '<span class="pill">+5 PTS</span></div>'
     ).join('') +
-    '<div class="brow empty"><span class="fwhen">Sample data — connect the API (API_URL) for live counting.</span></div>';
+    '<div class="brow empty"><span class="fwhen">Sample data — set API_URL to go live.</span></div>';
   }
   icons();
 }
@@ -869,7 +956,7 @@ function doRefill(){
 }
 
 // ============================================================
-//  NAV / MAIN BUTTON / SHEET
+//  NAV / MAIN BUTTON / SHEETS
 // ============================================================
 let activeTab = 'home';
 function go(tab){
@@ -907,13 +994,22 @@ function refreshMain(){
   else hideMainBtn();
 }
 
-function openSheet(){
-  $('sheet').classList.add('open'); $('veil').classList.add('show');
-  try{ tg && tg.BackButton && (tg.BackButton.show(), tg.BackButton.onClick(closeSheet)); }catch(e){}
+let openSheetEl = null;
+function showSheet(el){
+  closeSheets();
+  openSheetEl = el;
+  el.classList.add('open'); $('veil').classList.add('show');
+  try{ tg && tg.BackButton && (tg.BackButton.show(), tg.BackButton.onClick(closeSheets)); }catch(e){}
 }
-function closeSheet(){
-  $('sheet').classList.remove('open'); $('veil').classList.remove('show');
-  try{ tg && tg.BackButton && (tg.BackButton.offClick(closeSheet), tg.BackButton.hide()); }catch(e){}
+function closeSheets(){
+  if(openSheetEl){ openSheetEl.classList.remove('open'); openSheetEl = null; }
+  $('veil').classList.remove('show');
+  try{ tg && tg.BackButton && (tg.BackButton.offClick(closeSheets), tg.BackButton.hide()); }catch(e){}
+}
+function openNetSheet(){
+  showSheet($('netsheet'));
+  fillNetSheet();
+  pingServer().then(fillNetSheet); // fresh check every time it opens
 }
 
 // ============================================================
@@ -978,13 +1074,23 @@ document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click', ()=
   try{ tg && tg.openTelegramLink ? tg.openTelegramLink(u) : window.open(u,'_blank'); }
   catch(_){ window.open(u,'_blank'); }
 });
- $('infoBtn').addEventListener('click', openSheet);
- $('sheetClose').addEventListener('click', closeSheet);
- $('veil').addEventListener('click', closeSheet);
+
+// status chip + sheets
+ $('netChip').addEventListener('click', openNetSheet);
+ $('nsCheck').addEventListener('click', ()=>{
+  const btn = $('nsCheck');
+  btn.disabled = true;
+  fillNetSheet();
+  pingServer().then(()=>{ fillNetSheet(); btn.disabled = false; });
+});
+ $('infoBtn').addEventListener('click', ()=>showSheet($('aboutsheet')));
+ $('sheetClose').addEventListener('click', closeSheets);
+ $('netClose').addEventListener('click', closeSheets);
+ $('veil').addEventListener('click', closeSheets);
 
 document.addEventListener('visibilitychange', ()=>{
   if(document.hidden) flushSave();
-  else syncReferrals(true); // catch friends who joined while the app was closed
+  else { syncReferrals(true); if(netState==='offline') pingServer(); }
 });
 
 // ============================================================
@@ -1018,12 +1124,16 @@ regenStep();
 renderTicker();
 renderBoost();
 renderAll();
-setNetMode(API_URL ? 'Connecting…' : 'Demo data');
 go('home');
 icons();
+pingServer();        // sets the chip: ONLINE / OFFLINE / DEMO
 syncReferrals(true);
 setInterval(tick, 1000);
-setInterval(()=>{ if(!document.hidden) syncReferrals(); }, 30000);
+setInterval(()=>{
+  if(document.hidden) return;
+  syncReferrals();
+  if(netState==='offline') pingServer(); // auto-retry while offline
+}, 30000);
 </script>
 </body>
 </html>
