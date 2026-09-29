@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<script src='//libtl.com/sdk.js' data-zone='10951745' data-sdk='show_10951745'></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0B0B0D">
 <title>POINTR</title>
@@ -391,13 +392,13 @@
 /* ============================================================
    POINTR — invite-to-earn edition ($ economy)
    Internal money unit: $0.001
+   Ads: Monetag rewarded interstitial (zone 10951745)
    ============================================================ */
 
 // ---- CONFIG ------------------------------------------------
 const BOT_USERNAME = 'EbisaNewMiniappBot';
 const API_URL = 'https://pointr-api.ebisamagarsaa.workers.dev';
-// >>> Monetag zone id (from monetag.com). Empty = test ads.
-const MONETAG_ZONE = '';
+const MONETAG_ZONE = '10951745';
 const REF_REWARD = 5;      // $0.005
 const AD_REWARD = 2;       // $0.002
 const AD_DAILY = 50;
@@ -654,7 +655,9 @@ async function syncReferrals(force){
 }
 
 // ============================================================
-//  ADS (Monetag rewarded)
+//  ADS — Monetag rewarded interstitial (zone 10951745)
+//  The SDK tag is in <head>. show_10951745() resolves
+//  when the user finishes the ad; only then we pay.
 // ============================================================
 let adSdkLoading = null;
 function loadAdSdk(){
@@ -668,6 +671,14 @@ function loadAdSdk(){
     s.onload = ()=>res(true);
     s.onerror = ()=>res(false);
     document.head.appendChild(s);
+  }).then(async ok=>{
+    if(!ok) return false;
+    // script loaded — the show_ function can appear a moment later
+    for(let i=0;i<15;i++){
+      if(window['show_'+MONETAG_ZONE]) return true;
+      await new Promise(r=>setTimeout(r,200));
+    }
+    return !!window['show_'+MONETAG_ZONE];
   });
   return adSdkLoading;
 }
@@ -681,15 +692,11 @@ async function watchAd(){
   const b = $('btnAd');
   b.disabled = true; b.textContent = '…';
   try{
-    if(MONETAG_ZONE){
-      const ok = await loadAdSdk();
-      if(!ok) throw new Error('sdk');
-      const fn = window['show_'+MONETAG_ZONE];
-      if(!fn) throw new Error('sdk');
-      await fn(); // resolves when the rewarded ad completes
-    } else {
-      await new Promise(r=>setTimeout(r, 5000)); // TEST ad (no zone configured)
-    }
+    const ok = await loadAdSdk();
+    if(!ok) throw new Error('sdk');
+    const fn = window['show_'+MONETAG_ZONE];
+    if(!fn) throw new Error('sdk');
+    await fn(); // resolves only after the user completes the ad
     const r = await fetch(API_URL + '/api/ad', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -700,13 +707,13 @@ async function watchAd(){
     state.sb = d.bal; state.balance = d.bal;
     state.adsToday = d.today; state.adsTotal = d.total;
     renderBalance(); renderEarn(); renderWdReqs(); renderTasks(); checkAuto();
-    toast('+$0.002 · ad '+d.today+'/'+AD_DAILY+(MONETAG_ZONE?'':' (test)'),'play');
+    toast('+$0.002 · ad '+d.today+'/'+AD_DAILY,'play');
     haptic('notify','success');
     save();
   }catch(e){
     const m = e && e.message;
     if(m === 'limit') toast('Daily limit reached (50 ads)','clock');
-    else if(m === 'sdk') toast('Ad SDK failed to load — check zone id','wifi-off');
+    else if(m === 'sdk') toast('Ad failed to load — check your connection','wifi-off');
     else toast('Ad not finished — no reward','alert-circle');
   }
   adBusy = false;
@@ -871,7 +878,7 @@ function renderFriends(){
 // ---- Giveaway ----
 function renderPrizes(){
   $('gPrizes').innerHTML = PRIZES.map(p =>
-    '<div class="pchip"><span>'+ord(p[0]).toUpperCase().replace(/(\d)(\w+)/,'$1$2')+'</span><b>'+money(p[1])+'</b></div>'
+    '<div class="pchip"><span>'+ord(p[0]).toUpperCase()+'</span><b>'+money(p[1])+'</b></div>'
   ).join('');
 }
 async function loadGiveaway(){
