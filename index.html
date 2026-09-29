@@ -46,8 +46,6 @@
   .net-chip.online .net-dot{background:#4CC66B}
   .net-chip.offline{color:#E8837A;border-color:rgba(230,120,110,.35)}
   .net-chip.offline .net-dot{background:#E86358}
-  .net-chip.demo{color:var(--accent);border-color:rgba(245,185,59,.35)}
-  .net-chip.demo .net-dot{background:var(--accent)}
   .net-chip.checking .net-dot{background:var(--accent);animation:blink 1s infinite}
   main{flex:1;overflow-y:auto;padding:0 16px calc(96px + env(safe-area-inset-bottom))}
   .view{display:none;animation:viewIn .25s ease}
@@ -56,15 +54,7 @@
   h1{font-size:22px;font-weight:700;letter-spacing:-.02em;margin-top:16px}
   .sub{color:var(--muted);font-size:13px;margin:5px 0 18px;line-height:1.45}
   .sub b{color:var(--accent)}
-  .ticker{overflow:hidden;margin:12px -16px 0;padding:2px 0;
-    -webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
-    mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
-  .ticker-track{display:flex;width:max-content;animation:marquee 26s linear infinite}
-  .tk{font-size:12px;color:var(--muted);white-space:nowrap;padding-right:38px}
-  .tk b{color:var(--text);font-weight:600}
-  .tk::before{content:'';display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--accent);margin-right:8px;vertical-align:2px}
-  @keyframes marquee{to{transform:translateX(-50%)}}
-  .balance{margin-top:18px}
+  .balance{margin-top:20px}
   .bal-label{display:flex;justify-content:space-between;align-items:center;font-size:11px;letter-spacing:.14em;color:var(--muted);font-weight:600}
   .brand{color:var(--accent);letter-spacing:.3em;font-size:10px}
   .bal-num{margin:8px 0 4px;font-size:clamp(44px,14vw,58px);font-weight:700;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
@@ -221,8 +211,6 @@
   <main>
     <!-- ============ EARN ============ -->
     <section id="view-home" class="view active">
-      <div class="ticker"><div class="ticker-track" id="tickerTrack"></div></div>
-
       <div class="balance">
         <div class="bal-label"><span>YOUR BALANCE</span><span class="brand">POINTR</span></div>
         <div class="bal-num"><span id="balanceNum">$0.000</span></div>
@@ -390,9 +378,8 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <script>
 /* ============================================================
-   POINTR — invite-to-earn edition ($ economy)
+   POINTR — invite-to-earn ($ economy)
    Internal money unit: $0.001
-   Ads: Monetag rewarded interstitial (zone 10951745)
    ============================================================ */
 
 // ---- CONFIG ------------------------------------------------
@@ -407,6 +394,8 @@ const WD_MIN_ADS = 25;
 const WD_MIN_FRIENDS = 20;
 const DAILY_REWARDS = [3,3,3,3,3,3,10];
 const WEEK_MS = 604800000;
+// weeks counted from Jan 1 2025 -> week 1, 2, 3...
+const WEEK_EPOCH = 1735689600000;
 const CHANNEL_URL = 'https://t.me/telegram'; // TODO: your real channel
 const PRIZES = [[1,15000],[2,10000],[3,7000],[4,5000],[5,4000],[6,3000],[7,2000],[8,2000],[9,2000],[10,2000]];
 
@@ -513,7 +502,7 @@ function ord(n){
   return n+(s[(v-20)%10]||s[v]||s[0]);
 }
 const prizeFor = r => { const p = PRIZES.find(x=>x[0]===r); return p ? p[1] : 0; };
-const weekOf = t => Math.floor(t / WEEK_MS);
+const weekOf = t => Math.max(1, Math.floor((t - WEEK_EPOCH)/WEEK_MS) + 1);
 
 let toastT;
 function toast(msg, icon){
@@ -556,8 +545,7 @@ function setNet(s, msg){
   const chip = $('netChip');
   chip.className = 'net-chip ' + s;
   $('netLabel').textContent =
-    s==='online' ? 'ONLINE' : s==='offline' ? 'OFFLINE' :
-    s==='demo' ? 'DEMO' : '…';
+    s==='online' ? 'ONLINE' : s==='offline' ? 'OFFLINE' : '…';
 }
 async function pingServer(){
   if(!API_URL){ setNet('demo','No API URL configured'); return false; }
@@ -575,7 +563,6 @@ async function pingServer(){
 }
 function netHint(){
   const m = (lastNetMsg || '').toLowerCase();
-  if(netState === 'demo') return 'No server configured.';
   if(netState === 'checking') return 'Checking…';
   if(netState === 'offline'){
     if(m.includes('bot_token')) return 'Add BOT_TOKEN in Worker settings.';
@@ -588,7 +575,7 @@ function netHint(){
 }
 function fillNetSheet(){
   $('nsUrl').textContent = API_URL || 'Not set';
-  $('nsReach').textContent = netState==='online'?'Yes':netState==='offline'?'No':netState==='demo'?'—':'Checking…';
+  $('nsReach').textContent = netState==='online'?'Yes':netState==='offline'?'No':'Checking…';
   $('nsMsg').textContent = lastNetMsg || '—';
   $('nsLogin').textContent = (tg && tg.initData) ? 'Yes (Telegram)' : 'No';
   $('nsSync').textContent = lastSyncOk ? fmtAgo(lastSyncOk) : 'Never';
@@ -596,7 +583,7 @@ function fillNetSheet(){
 }
 
 // ============================================================
-//  SYNC (referrals + balance + ads + giveaway count)
+//  SYNC
 // ============================================================
 let lastSync = 0;
 async function syncReferrals(force){
@@ -655,9 +642,7 @@ async function syncReferrals(force){
 }
 
 // ============================================================
-//  ADS — Monetag rewarded interstitial (zone 10951745)
-//  The SDK tag is in <head>. show_10951745() resolves
-//  when the user finishes the ad; only then we pay.
+//  ADS — Monetag rewarded (zone 10951745)
 // ============================================================
 let adSdkLoading = null;
 function loadAdSdk(){
@@ -673,7 +658,6 @@ function loadAdSdk(){
     document.head.appendChild(s);
   }).then(async ok=>{
     if(!ok) return false;
-    // script loaded — the show_ function can appear a moment later
     for(let i=0;i<15;i++){
       if(window['show_'+MONETAG_ZONE]) return true;
       await new Promise(r=>setTimeout(r,200));
@@ -696,7 +680,7 @@ async function watchAd(){
     if(!ok) throw new Error('sdk');
     const fn = window['show_'+MONETAG_ZONE];
     if(!fn) throw new Error('sdk');
-    await fn(); // resolves only after the user completes the ad
+    await fn();
     const r = await fetch(API_URL + '/api/ad', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -791,15 +775,6 @@ function claimDaily(){
   toast('Daily bonus · +'+money(reward),'gift');
   haptic('notify','success');
   renderDaily(); refreshMain(); renderWdReqs(); save(); syncReferrals(true);
-}
-
-const TICKS = [
-  ['Mina','invited 5 friends and won $0.025'], ['Arjun','watched 50 ads today'], ['Sofia','claimed a $0.01 day-7 bonus'],
-  ['Dmitri','won #1 in last week\'s giveaway'], ['Lena','withdrew $2.00'], ['Omar','invited a friend'],
-];
-function renderTicker(){
-  const half = TICKS.map(t=>'<span class="tk"><b>'+t[0]+'</b> '+t[1]+'</span>').join('');
-  $('tickerTrack').innerHTML = half + half;
 }
 
 // ---- Tasks ----
@@ -1147,7 +1122,8 @@ function tick(){
     $('dailyBtn').textContent = 'Next bonus in '+fmtHMS(nextMidnight()-Date.now());
   if(activeTab==='gift'){
     const wk = weekOf(Date.now());
-    $('gCountdown').textContent = fmtDHM((wk+1)*WEEK_MS - Date.now());
+    const end = WEEK_EPOCH + wk*WEEK_MS;
+    $('gCountdown').textContent = fmtDHM(end - Date.now());
   }
 }
 
@@ -1159,7 +1135,6 @@ function renderAll(){
 }
 load();
 prevAvail = dailyAvailable();
-renderTicker();
 renderPrizes();
 renderAll();
 go('home');
