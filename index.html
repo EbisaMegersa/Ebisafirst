@@ -123,6 +123,7 @@
   .ask-box{margin:4px 0 10px;padding:10px 12px;border-radius:12px;font-size:12.5px;line-height:1.5}
   .ask-box.locked{background:rgba(230,120,110,.08);border:1px solid rgba(230,120,110,.3);color:#E8A39B}
   .ask-box.ready{background:rgba(90,200,120,.08);border:1px solid rgba(90,200,120,.3);color:#8FD8A0}
+  .ask-box svg{width:14px;height:14px;vertical-align:-2px;margin-right:4px}
   .linkbox{display:flex;align-items:center;gap:10px;padding:10px 10px 10px 14px;margin-bottom:10px}
   #refLink{flex:1;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .stats{display:flex;align-items:stretch;padding:16px;margin-top:14px}
@@ -292,7 +293,7 @@
         <div id="wdReqs"></div>
         <button class="btn btn-accent btn-block" id="wdOpen">Withdraw earnings</button>
       </div>
-      <p class="foot-note">Each withdrawal request uses 25 ads + 20 friends from your totals.</p>
+      <p class="foot-note">Each withdrawal request uses 25 ads + 20 friends. Your total invited count stays forever.</p>
     </section>
 
     <!-- ============ TASKS ============ -->
@@ -318,7 +319,7 @@
       <div class="panel stats">
         <div class="stat">
           <div class="stat-num" id="frCount">0</div>
-          <div class="stat-lbl">FRIENDS INVITED</div>
+          <div class="stat-lbl">TOTAL FRIENDS INVITED</div>
         </div>
         <div class="vdiv"></div>
         <div class="stat">
@@ -379,12 +380,12 @@
       <h3>How POINTR works</h3>
       <button id="sheetClose" class="icon-btn" aria-label="Close"><i data-lucide="x"></i></button>
     </div>
-    <div class="sh-row"><i data-lucide="users"></i><div><b>Invite friends</b><span>+ $0.005 for every friend who opens the app with your link.</span></div></div>
+    <div class="sh-row"><i data-lucide="users"></i><div><b>Invite friends</b><span>+ $0.005 for every friend who opens the app with your link. Your total count never decreases.</span></div></div>
     <div class="sh-row"><i data-lucide="play"></i><div><b>Watch ads</b><span>+ $0.002 per ad — up to 50 ads per day.</span></div></div>
     <div class="sh-row"><i data-lucide="gift"></i><div><b>Daily bonus</b><span>$0.003 daily; day 7 of your streak pays $0.01.</span></div></div>
     <div class="sh-row"><i data-lucide="list-checks"></i><div><b>Tasks</b><span>One-time quests, $0.005 each.</span></div></div>
     <div class="sh-row"><i data-lucide="trophy"></i><div><b>Weekly giveaway</b><span>Top inviters share the prize pool: $15 / $10 / $7 / $5 / $4 / $3 and $2 for places 7–10. Paid every week.</span></div></div>
-    <div class="sh-row"><i data-lucide="banknote"></i><div><b>Withdraw</b><span>Minimum $1.50. Every request requires 25 ads and 20 friends — and uses them up. Declined requests refund the money but not the ads or friends.</span></div></div>
+    <div class="sh-row"><i data-lucide="banknote"></i><div><b>Withdraw</b><span>Minimum $1.50. Every request requires 25 ads and 20 available friends — and uses them up. Your total invited count stays forever. Declined requests refund the money but not the ads or friends.</span></div></div>
   </div>
 
   <!-- Server status sheet -->
@@ -422,7 +423,7 @@
     </div>
     <div class="list-head">Your requests</div>
     <div id="wdList"></div>
-    <p class="sh-note">Requests are reviewed manually. If approved, the payout is sent to the details you provided. If declined, your money is refunded automatically — but the 25 ads and 20 friends used by the request are not returned.</p>
+    <p class="sh-note">Requests are reviewed manually. If approved, the payout is sent to the details you provided. If declined, your money is refunded automatically — but the 25 ads and 20 available friends used by the request are not returned.</p>
   </div>
 </div>
 
@@ -431,6 +432,9 @@
 /* ============================================================
    POINTR — invite-to-earn ($ economy)
    Internal money unit: $0.001
+   Two invite numbers:
+   - invited  = lifetime total (display, never decreases)
+   - availInv = free for withdrawal (consumed 20/request)
    ============================================================ */
 
 // ---- CONFIG ------------------------------------------------
@@ -481,7 +485,7 @@ function userKey(){
 }
 function defState(){
   return { v:2, updatedAt:0, balance:0, total:0,
-    dailyLast:0, streak:0, invited:0, friends:[],
+    dailyLast:0, streak:0, invited:0, availInv:0, friends:[],
     tasks:{}, flags:{}, sb:null, wds:[],
     adsToday:0, adsTotal:0, wkc:0 };
 }
@@ -654,6 +658,7 @@ async function syncReferrals(force){
     if(d.freshJoin) toast('Welcome! Invited by ' + (d.referrerName || 'a friend'), 'user-plus');
 
     state.invited = d.invited;
+    state.availInv = (typeof d.availInv === 'number') ? d.availInv : d.invited;
     state.friends = d.friends || [];
     if(Array.isArray(d.wds)) state.wds = d.wds;
     if(typeof d.adsToday === 'number') state.adsToday = d.adsToday;
@@ -779,11 +784,11 @@ function renderEarn(){
   btn.textContent = state.adsToday >= AD_DAILY ? 'Limit' : 'Watch';
 }
 function renderWdReqs(){
-  const okF = state.invited >= WD_MIN_FRIENDS;
+  const okF = state.availInv >= WD_MIN_FRIENDS;
   const okA = state.adsTotal >= WD_MIN_ADS;
   const okB = state.sb != null && state.sb >= MIN_WITHDRAW;
   const html =
-    '<div class="qrow '+(okF?'ok':'bad')+'"><i data-lucide="'+(okF?'check-circle-2':'x-circle')+'"></i>Friends available<b>'+state.invited+' / '+WD_MIN_FRIENDS+'</b></div>'+
+    '<div class="qrow '+(okF?'ok':'bad')+'"><i data-lucide="'+(okF?'check-circle-2':'x-circle')+'"></i>Friends available<b>'+state.availInv+' / '+WD_MIN_FRIENDS+'</b></div>'+
     '<div class="qrow '+(okA?'ok':'bad')+'"><i data-lucide="'+(okA?'check-circle-2':'x-circle')+'"></i>Ads available<b>'+state.adsTotal+' / '+WD_MIN_ADS+'</b></div>'+
     '<div class="qrow '+(okB?'ok':'bad')+'"><i data-lucide="'+(okB?'check-circle-2':'x-circle')+'"></i>Minimum balance<b>'+money(state.sb==null?0:state.sb)+' / '+money(MIN_WITHDRAW)+'</b></div>';
   $('wdReqs').innerHTML = html;
@@ -878,7 +883,7 @@ function checkAuto(){
 function renderFriends(){
   $('refLink').textContent = refLink();
   $('frCount').textContent = fmt(state.invited);
-  $('frEarned').textContent = money(state.invited * REF_REWARD);
+  $('frEarned').textContent = money(state.friends.length * REF_REWARD);
   const list = $('friendList');
   if(API_URL && state.friends && state.friends.length){
     list.innerHTML = state.friends.slice().reverse().map(f =>
@@ -890,7 +895,7 @@ function renderFriends(){
   } else if(API_URL){
     list.innerHTML = '<div class="brow empty"><span class="fwhen">No friends yet — share your link above.</span></div>';
   } else {
-    list.innerHTML = '<div class="brow empty"><span class="fwhen">Connect the API to track friends.</span></div>';
+    list.innerHTML = '<div class="brow empty"><span class="fwhen">Connect the API to track friends.</span></div></div>';
   }
   icons();
 }
@@ -985,12 +990,12 @@ function renderWdList(){
 }
 function renderWd(){
   $('wdBal').textContent = state.sb==null ? 'syncing…' : money(state.sb);
-  const okF = state.invited >= WD_MIN_FRIENDS;
+  const okF = state.availInv >= WD_MIN_FRIENDS;
   const okA = state.adsTotal >= WD_MIN_ADS;
   const okB = state.sb != null && state.sb >= MIN_WITHDRAW;
   const ask = $('wdAsk');
   if(!(okF && okA)){
-    const needF = Math.max(0, WD_MIN_FRIENDS - state.invited);
+    const needF = Math.max(0, WD_MIN_FRIENDS - state.availInv);
     const needA = Math.max(0, WD_MIN_ADS - state.adsTotal);
     let msg = 'To unlock withdrawals: ';
     const parts = [];
@@ -1001,7 +1006,9 @@ function renderWd(){
       ' Each request then uses 25 ads + 20 friends.</div>';
   } else {
     ask.innerHTML = '<div class="ask-box ready"><i data-lucide="check-circle-2"></i> '+
-      'Requirements met. This request will use <b>25 ads</b> and <b>20 friends</b>.</div>';
+      'Requirements met. This request will use <b>25 ads</b> and <b>20 friends</b>'+
+      ' — afterwards you\'ll still have <b>'+Math.max(0,state.availInv-WD_MIN_FRIENDS)+'</b> friends'+
+      ' and <b>'+Math.max(0,state.adsTotal-WD_MIN_ADS)+'</b> ads available.</div>';
   }
   const btn = $('wdSubmit');
   btn.disabled = !(okF && okA && okB);
@@ -1132,7 +1139,7 @@ document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click', ()=
     if(!d.ok) throw new Error(d.error || 'failed');
     state.balance = d.bal; state.sb = d.bal;
     if(typeof d.ads === 'number') state.adsTotal = d.ads;
-    if(typeof d.inv === 'number') state.invited = d.inv;
+    if(typeof d.avail === 'number') state.availInv = d.avail;
     state.wds = state.wds || [];
     state.wds.unshift(d.wd);
     renderBalance(); renderWd(); renderWdReqs(); renderFriends(); renderTasks();
