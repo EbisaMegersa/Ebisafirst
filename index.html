@@ -120,6 +120,9 @@
   .qrow.ok svg{color:var(--good)}
   .qrow.bad svg{color:var(--bad)}
   .qrow b{margin-left:auto;font-variant-numeric:tabular-nums}
+  .ask-box{margin:4px 0 10px;padding:10px 12px;border-radius:12px;font-size:12.5px;line-height:1.5}
+  .ask-box.locked{background:rgba(230,120,110,.08);border:1px solid rgba(230,120,110,.3);color:#E8A39B}
+  .ask-box.ready{background:rgba(90,200,120,.08);border:1px solid rgba(90,200,120,.3);color:#8FD8A0}
   .linkbox{display:flex;align-items:center;gap:10px;padding:10px 10px 10px 14px;margin-bottom:10px}
   #refLink{flex:1;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .stats{display:flex;align-items:stretch;padding:16px;margin-top:14px}
@@ -129,7 +132,7 @@
   .stat:last-child .stat-num{font-size:22px;color:var(--text)}
   .stat-lbl{font-size:11px;color:var(--muted);margin-top:3px;letter-spacing:.05em}
   .vdiv{width:1px;background:var(--line);margin:0 18px}
-  #friendList,#gList,#gLast{overflow:hidden}
+  #friendList,#gList{overflow:hidden}
   .brow{display:flex;align-items:center;gap:10px;padding:11px 12px}
   .brow:not(:last-child){border-bottom:1px solid var(--line)}
   .ava{width:36px;height:36px;border-radius:50%;background:var(--panel2);border:1px solid var(--line);
@@ -146,8 +149,6 @@
   .brow.empty .fwhen{text-align:center;padding:6px 0;line-height:1.5}
   .bpts{margin-left:auto;font-size:12.5px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums;flex-shrink:0}
   .brow.me .bpts{color:var(--accent)}
-
-  /* ---------- GIVEAWAY: countdown card ---------- */
   .cd-card{margin-top:16px;padding:16px 14px;text-align:center;
     background:linear-gradient(180deg,#17171B,#0F0F12);
     border:1px solid rgba(245,185,59,.3);border-radius:18px;
@@ -162,10 +163,8 @@
   .cd-seg span{display:block;font-size:8px;color:var(--muted);letter-spacing:.18em;margin-top:4px}
   .cd-colon{color:var(--accent);font-size:20px;font-weight:700;opacity:.55;
     text-shadow:0 0 10px rgba(245,185,59,.4);padding-bottom:16px}
-
-  /* ---------- GIVEAWAY: 3D podium ---------- */
   .podium{margin-top:16px;display:grid;grid-template-columns:1fr 1.12fr 1fr;gap:7px;align-items:end;
-    padding:0 4px;border-bottom:1px solid var(--line);padding-bottom:0}
+    padding:0 4px;border-bottom:1px solid var(--line)}
   .pslot{text-align:center;min-width:0}
   .pav{width:46px;height:46px;margin:0 auto 7px;border-radius:50%;background:var(--panel2);
     border:2px solid var(--line);display:grid;place-items:center;
@@ -190,7 +189,6 @@
     background:linear-gradient(180deg,#3B3B43,#2A2A31)}
   .pslot.p3 .pbase{height:42px;color:#77747A;
     background:linear-gradient(180deg,#33333A,#24242B)}
-
   #tabbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;display:flex;
     background:rgba(13,13,15,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
     border-top:1px solid var(--line);padding:7px 8px calc(7px + env(safe-area-inset-bottom));z-index:100}
@@ -294,6 +292,7 @@
         <div id="wdReqs"></div>
         <button class="btn btn-accent btn-block" id="wdOpen">Withdraw earnings</button>
       </div>
+      <p class="foot-note">Each withdrawal request uses 25 ads + 20 friends from your totals.</p>
     </section>
 
     <!-- ============ TASKS ============ -->
@@ -360,9 +359,6 @@
 
       <div class="list-head">Ranks 4 – 50</div>
       <div class="panel" id="gList"></div>
-
-      <div class="list-head"><i data-lucide="crown"></i>Last week's winners</div>
-      <div class="panel" id="gLast"></div>
     </section>
   </main>
 
@@ -388,7 +384,7 @@
     <div class="sh-row"><i data-lucide="gift"></i><div><b>Daily bonus</b><span>$0.003 daily; day 7 of your streak pays $0.01.</span></div></div>
     <div class="sh-row"><i data-lucide="list-checks"></i><div><b>Tasks</b><span>One-time quests, $0.005 each.</span></div></div>
     <div class="sh-row"><i data-lucide="trophy"></i><div><b>Weekly giveaway</b><span>Top inviters share the prize pool: $15 / $10 / $7 / $5 / $4 / $3 and $2 for places 7–10. Paid every week.</span></div></div>
-    <div class="sh-row"><i data-lucide="banknote"></i><div><b>Withdraw</b><span>Minimum $1.50. To unlock withdrawals: 20 friends invited and 25 ads watched total. Requests are reviewed manually — declined requests are auto-refunded.</span></div></div>
+    <div class="sh-row"><i data-lucide="banknote"></i><div><b>Withdraw</b><span>Minimum $1.50. Every request requires 25 ads and 20 friends — and uses them up. Declined requests refund the money but not the ads or friends.</span></div></div>
   </div>
 
   <!-- Server status sheet -->
@@ -415,6 +411,7 @@
       <button id="wdClose" class="icon-btn" aria-label="Close"><i data-lucide="x"></i></button>
     </div>
     <div class="sh-row"><i data-lucide="wallet"></i><div><b>Server balance</b><span id="wdBal">syncing…</span></div></div>
+    <div id="wdAsk"></div>
     <div id="wdReqS"></div>
     <div class="wd-form">
       <label>Amount (min $1.50)</label>
@@ -425,7 +422,7 @@
     </div>
     <div class="list-head">Your requests</div>
     <div id="wdList"></div>
-    <p class="sh-note">Requests are reviewed manually. If approved, the payout is sent to the details you provided. If declined, your money is refunded automatically.</p>
+    <p class="sh-note">Requests are reviewed manually. If approved, the payout is sent to the details you provided. If declined, your money is refunded automatically — but the 25 ads and 20 friends used by the request are not returned.</p>
   </div>
 </div>
 
@@ -786,8 +783,8 @@ function renderWdReqs(){
   const okA = state.adsTotal >= WD_MIN_ADS;
   const okB = state.sb != null && state.sb >= MIN_WITHDRAW;
   const html =
-    '<div class="qrow '+(okF?'ok':'bad')+'"><i data-lucide="'+(okF?'check-circle-2':'x-circle')+'"></i>Friends invited<b>'+state.invited+' / '+WD_MIN_FRIENDS+'</b></div>'+
-    '<div class="qrow '+(okA?'ok':'bad')+'"><i data-lucide="'+(okA?'check-circle-2':'x-circle')+'"></i>Ads watched<b>'+state.adsTotal+' / '+WD_MIN_ADS+'</b></div>'+
+    '<div class="qrow '+(okF?'ok':'bad')+'"><i data-lucide="'+(okF?'check-circle-2':'x-circle')+'"></i>Friends available<b>'+state.invited+' / '+WD_MIN_FRIENDS+'</b></div>'+
+    '<div class="qrow '+(okA?'ok':'bad')+'"><i data-lucide="'+(okA?'check-circle-2':'x-circle')+'"></i>Ads available<b>'+state.adsTotal+' / '+WD_MIN_ADS+'</b></div>'+
     '<div class="qrow '+(okB?'ok':'bad')+'"><i data-lucide="'+(okB?'check-circle-2':'x-circle')+'"></i>Minimum balance<b>'+money(state.sb==null?0:state.sb)+' / '+money(MIN_WITHDRAW)+'</b></div>';
   $('wdReqs').innerHTML = html;
   const el2 = $('wdReqS'); if(el2) el2.innerHTML = html;
@@ -918,21 +915,16 @@ function podiumHTML(e, rank){
 async function loadGiveaway(){
   const wk = weekOf(Date.now());
   $('gWeek').textContent = wk;
-  const list = $('gList'), last = $('gLast'), pod = $('podium');
+  const list = $('gList'), pod = $('podium');
   if(!API_URL){
     list.innerHTML = '<div class="brow empty"><span class="fwhen">Connect the API to see standings.</span></div>';
-    last.innerHTML = '<div class="brow empty"><span class="fwhen">—</span></div>';
     $('gMe').textContent = '';
     return;
   }
   list.innerHTML = '<div class="brow empty"><span class="fwhen"><span class="spin"></span></span></div>';
   try{
-    const [r1, r2] = await Promise.all([
-      fetch(API_URL + '/api/top'),
-      fetch(API_URL + '/api/top?week=' + (wk-1))
-    ]);
+    const r1 = await fetch(API_URL + '/api/top');
     const d1 = await r1.json();
-    const d2 = await r2.json();
     const top = (d1.ok ? d1.top : []);
     const uidStr = String(userId());
     let myRank = 0;
@@ -968,23 +960,6 @@ async function loadGiveaway(){
     $('gMe').textContent = (myRank
       ? 'You are '+ord(myRank)+' this week — keep inviting!'
       : 'You: '+state.wkc+' invite'+(state.wkc===1?'':'s')+' this week'+(state.wkc?' (outside top 50)':''));
-
-    const ltop = (d2.ok ? d2.top : []).slice(0,10);
-    if(ltop.length){
-      last.innerHTML = ltop.map((e,i)=>{
-        const pz = prizeFor(i+1);
-        if(!pz) return '';
-        return '<div class="brow">'+
-          '<span class="rank">#'+(i+1)+'</span>'+
-          '<span class="ava sm">'+esc((e.name[0]||'?')).toUpperCase()+'</span>'+
-          '<div class="finfo"><div class="bname">'+esc(e.name)+'</div></div>'+
-          '<span class="bpts">'+e.invited+' Refers</span>'+
-          '<span class="pill paid">'+money(pz)+'</span>'+
-        '</div>';
-      }).join('') || '<div class="brow empty"><span class="fwhen">No data.</span></div>';
-    } else {
-      last.innerHTML = '<div class="brow empty"><span class="fwhen">First giveaway ends this week — be the first winner!</span></div>';
-    }
   }catch(e){
     list.innerHTML = '<div class="brow empty"><span class="fwhen">Could not load standings.</span></div>';
   }
@@ -1013,12 +988,28 @@ function renderWd(){
   const okF = state.invited >= WD_MIN_FRIENDS;
   const okA = state.adsTotal >= WD_MIN_ADS;
   const okB = state.sb != null && state.sb >= MIN_WITHDRAW;
+  const ask = $('wdAsk');
+  if(!(okF && okA)){
+    const needF = Math.max(0, WD_MIN_FRIENDS - state.invited);
+    const needA = Math.max(0, WD_MIN_ADS - state.adsTotal);
+    let msg = 'To unlock withdrawals: ';
+    const parts = [];
+    if(needF > 0) parts.push('invite <b>'+needF+'</b> more friend'+(needF===1?'':'s'));
+    if(needA > 0) parts.push('watch <b>'+needA+'</b> more ad'+(needA===1?'':'s'));
+    msg += parts.join(' and ') + '.';
+    ask.innerHTML = '<div class="ask-box locked"><i data-lucide="lock"></i> '+msg+
+      ' Each request then uses 25 ads + 20 friends.</div>';
+  } else {
+    ask.innerHTML = '<div class="ask-box ready"><i data-lucide="check-circle-2"></i> '+
+      'Requirements met. This request will use <b>25 ads</b> and <b>20 friends</b>.</div>';
+  }
   const btn = $('wdSubmit');
   btn.disabled = !(okF && okA && okB);
-  btn.textContent = !(okF && okA) ? 'Locked — see requirements'
+  btn.textContent = !(okF && okA) ? 'Locked — see requirements above'
     : (!okB ? 'Need min '+money(MIN_WITHDRAW) : 'Request withdrawal');
   renderWdList();
   renderWdReqs();
+  icons();
 }
 function openWd(){
   showSheet($('wdsheet'));
@@ -1140,11 +1131,13 @@ document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click', ()=
     const d = await r.json();
     if(!d.ok) throw new Error(d.error || 'failed');
     state.balance = d.bal; state.sb = d.bal;
+    if(typeof d.ads === 'number') state.adsTotal = d.ads;
+    if(typeof d.inv === 'number') state.invited = d.inv;
     state.wds = state.wds || [];
     state.wds.unshift(d.wd);
-    renderBalance(); renderWd(); renderWdReqs();
+    renderBalance(); renderWd(); renderWdReqs(); renderFriends(); renderTasks();
     $('wdAmount').value = ''; $('wdNote').value = '';
-    toast('Request sent — awaiting review','banknote');
+    toast('Request sent · used 25 ads + 20 friends','banknote');
     haptic('notify','success');
     save();
   }catch(e){
